@@ -1,0 +1,1 @@
+{"name":"@rendered/shared","private":true,"type":"module","exports":{".":"./src/types.ts","./content":"./src/content/index.ts"},"scripts":{"typecheck":"tsc --noEmit"}}
