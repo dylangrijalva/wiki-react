@@ -44,12 +44,12 @@ Open [the local field guide](http://127.0.0.1:5177). Vite serves the interface o
 
 ### At the workbench
 
-| Experience           | Try it                                                                                                                                                     |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Visual walkthrough   | Use **←** and **→** to step through a diagram. Compare the highlighted nodes with the code. Replay a transition or pause motion.                           |
+| Experience           | Try it                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Visual walkthrough   | Use **←** and **→** to step through a diagram. Compare the highlighted nodes with the code. Replay a transition or pause motion.                                               |
 | Hands-on experiments | Change list keys, solo a channel, switch effect dependencies, compose children, toggle memoization, or resolve a request. The performance experiment counts simulated renders. |
-| Curriculum explorer  | Filter by subject, difficulty, or progress. Press **⌘K** or **Ctrl+K** to search by concept, then use the arrows and Enter to open a lesson.               |
-| Field notes          | Save a bookmark, finish a knowledge check, or leave a lesson midway. Your guest dashboard shows where to resume on this browser.                           |
+| Curriculum explorer  | Filter by subject, difficulty, or progress. Press **⌘K** or **Ctrl+K** to search by concept, then use the arrows and Enter to open a lesson.                                   |
+| Field notes          | Save a bookmark, finish a knowledge check, or leave a lesson midway. Your guest dashboard shows where to resume on this browser.                                               |
 
 ## Architecture
 

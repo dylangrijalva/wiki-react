@@ -1,11 +1,22 @@
-import type { Step } from '../types.js';
+import type { Step } from '../types.js'
 
-type Node = Step['scene']['nodes'][number];
+type Node = Step['scene']['nodes'][number]
 
-export function node(id: string, label: string, status: Node['status'] = 'idle', detail?: string): Node {
-  return { id, label, status, ...(detail ? { detail } : {}) };
+export function node(
+  id: string,
+  label: string,
+  status: Node['status'] = 'idle',
+  detail?: string,
+): Node {
+  return { id, label, status, ...(detail ? { detail } : {}) }
 }
 
-export function step(title: string, body: string, code: string, nodes: Node[], edges: [string, string][] = []): Step {
-  return { title, body, code, scene: { nodes, edges } };
+export function step(
+  title: string,
+  body: string,
+  code: string,
+  nodes: Node[],
+  edges: [string, string][] = [],
+): Step {
+  return { title, body, code, scene: { nodes, edges } }
 }
