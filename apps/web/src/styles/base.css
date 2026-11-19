@@ -94,7 +94,7 @@ p {
   margin: 0;
 }
 button:active:not(:disabled),
-.btn:active {
+.btn:active:not(:disabled) {
   transform: translateY(1px);
 }
 svg {
