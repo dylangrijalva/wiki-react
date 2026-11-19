@@ -5,6 +5,21 @@
 <p align="center"><img src="docs/stack.svg" alt="React · TypeScript · Motion · Hono · SQLite" width="440"></p>
 <p align="center"><a href="#run-it-locally">Quick start</a> · <a href="#inside-the-course">Curriculum</a> · <a href="docs/operations.md">API and deployment</a> · <a href="docs/contributing.md">Contribute</a></p>
 
+## Run it locally
+
+Use Node.js 24. If you need pnpm, install the version pinned in this repository with `npm install --global pnpm@10.32.1`.
+
+Open a terminal in the repository root (the folder containing `pnpm-workspace.yaml`) and run these commands.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+**Open [http://127.0.0.1:5177](http://127.0.0.1:5177) in your browser.** Leave the terminal running while you use the course. Vite forwards API requests to Hono on port 3001. Hono creates `apps/api/data/learning.sqlite`, applies migrations, and loads the curriculum automatically.
+
+Press **Ctrl+C** in the terminal to stop both servers. Run `pnpm dev` again to pick up where you left off.
+
 ![The lesson player showing the Player component, its title and play counter, and the code that connects them.](screenshots/lesson.png)
 
 ## What changes when you click?
@@ -12,17 +27,6 @@
 A counter goes from zero to one. React calls a component, compares its output, and updates a text node. The button you clicked can stay right where it was. The opening lesson takes that single interaction apart on screen.
 
 The course follows examples from an audio editor. Switch stations to watch an effect clean up its old connection. Reorder clips to see which draft follows its key. Toggle memoization and compare render calls. Each lesson pairs an animated scene with a short code excerpt and ends with a question you can answer from the diagram.
-
-## Run it locally
-
-Use Node.js 24 and pnpm 10.32.1. From the repository root, run:
-
-```sh
-pnpm install --frozen-lockfile
-pnpm dev
-```
-
-Open [the local field guide](http://127.0.0.1:5177). Vite serves the interface on port 5177 and forwards API requests to Hono on port 3001. The first startup creates the local SQLite database, runs migrations, and seeds the curriculum.
 
 ## Inside the course
 

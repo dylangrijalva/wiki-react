@@ -80,6 +80,13 @@ export default function Home() {
         </div>
         <RenderFigure />
       </section>
+      <aside className="author-note" aria-labelledby="author-note-title">
+        <h2 id="author-note-title">Why I made this guide</h2>
+        <p>
+          I struggled with React when I was starting out. I made these lessons to give you an easier
+          way to learn it. You can step through a diagram and see what your code does.
+        </p>
+      </aside>
       <section className="track-section">
         <div className="section-head">
           <h2>Learning tracks</h2>
