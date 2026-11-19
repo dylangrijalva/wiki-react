@@ -24,6 +24,12 @@ Mount a persistent volume at `/var/lib/react-rendered` and give the service acco
 
 Startup applies pending SQL migrations, then seeds published tracks and lessons from `@rendered/shared/content` in one transaction. A removed lesson is unpublished. Its learner records remain in SQLite if the slug returns. The health check runs a database query and returns `{"status":"ok"}` at `/api/health`.
 
+To check a local server after startup, run the following command.
+
+```sh
+curl --fail --show-error --silent http://127.0.0.1:3001/api/health
+```
+
 ## Accounts and guest sessions
 
 Guests can open lessons immediately. The first `GET /api/progress` from a guest browser sets a one-year guest cookie. Creating an account moves that guest’s bookmarks and progress to the account. Signing in to an existing account loads its own records. After sign-out, the browser returns to the guest library it had before sign-in.
