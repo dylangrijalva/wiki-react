@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Bookmark, Compass, Check } from 'lucide-react'
-import type { LessonSummary } from '@rendered/shared'
-import { useBookmarks, useProgress, useLessons, useTracks } from '../../lib/api'
-import { useSession } from '../../lib/session'
+import type { LessonSummary } from '@rendered/shared/contracts/catalog'
+import { useBookmarks } from '../bookmarks/queries'
+import { useProgress } from './queries'
+import { useLessons, useTracks } from '../curriculum/queries'
+import { useSession } from '../account/session'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
+import './progress.css'
+
 function ReadingList({
   title,
   rows,

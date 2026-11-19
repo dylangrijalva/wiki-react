@@ -1,4 +1,4 @@
-import type { Lesson } from '../types.js'
+import type { Lesson } from '../contracts/catalog.js'
 import { node, step } from './scene.js'
 
 export const architecture: Lesson[] = [
@@ -102,7 +102,7 @@ export const architecture: Lesson[] = [
       step(
         'Look inside LibraryPage',
         'LibraryPage loads clips, keeps the search term, and renders editable rows. A change to how a row opens has little to do with how the page fetches its clips.',
-        'function LibraryPage() {\n  const clips = useClips();\n  const [query, setQuery] = useState("");\n  // Render search, results, and clip actions.\n}',
+        'const clips = useClips();\nconst [query, setQuery] = useState("");',
         [node('page', 'LibraryPage', 'active', 'load + filter + rows')],
       ),
       step(

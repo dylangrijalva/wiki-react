@@ -1,4 +1,4 @@
-import type { Track } from '../types.js'
+import type { Track } from '../contracts/catalog.js'
 
 export const tracks: Track[] = [
   {

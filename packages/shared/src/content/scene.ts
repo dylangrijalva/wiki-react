@@ -1,4 +1,4 @@
-import type { Step } from '../types.js'
+import type { Step } from '../contracts/catalog.js'
 
 type Node = Step['scene']['nodes'][number]
 

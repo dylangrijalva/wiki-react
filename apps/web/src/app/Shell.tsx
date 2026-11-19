@@ -4,7 +4,7 @@ import { Search, Moon, Sun, Menu, X, Command } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Brand } from '../components/Brand'
 import Palette from '../features/search/Palette'
-import { useSession } from '../lib/session'
+import { useSession } from '../features/account/session'
 
 const pages = [
   ['/', 'Overview'],

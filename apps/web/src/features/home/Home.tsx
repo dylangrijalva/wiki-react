@@ -10,7 +10,7 @@ import {
   Route,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useLessons, useTracks } from '../../lib/api'
+import { useLessons, useTracks } from '../curriculum/queries'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
 import RenderFigure from './RenderFigure'
 import HeroHeadline from './HeroHeadline'

@@ -1,4 +1,4 @@
-import type { Lesson } from '../types.js'
+import type { Lesson } from '../contracts/catalog.js'
 import { node, step } from './scene.js'
 
 export const production: Lesson[] = [

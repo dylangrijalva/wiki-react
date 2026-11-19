@@ -1,5 +1,5 @@
 import { expect, test as base, type Page } from '@playwright/test'
-import type { Lesson, LessonSummary } from '../packages/shared/src/types'
+import type { Lesson, LessonSummary } from '../packages/shared/src/contracts/catalog'
 
 const test = base.extend<{ errors: void }>({
   errors: [

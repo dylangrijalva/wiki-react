@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, ChevronDown, Search, Clock3 } from 'lucide-react'
-import type { Lesson, LessonSummary, Progress, Track } from '@rendered/shared'
+import type { Lesson, LessonSummary, Track } from '@rendered/shared/contracts/catalog'
+import type { Progress } from '@rendered/shared/contracts/progress'
 
 export function LessonNavigation({
   tracks,

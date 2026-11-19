@@ -247,3 +247,25 @@ kbd {
     scroll-behavior: auto !important;
   }
 }
+
+.page-title h1 {
+  font-size: clamp(40px, 7vw, 92px);
+  margin: 22px 0 8px;
+}
+.page-title h1 span {
+  color: var(--purple);
+}
+.page-title > p {
+  color: var(--muted);
+  font-size: 17px;
+}
+progress::-webkit-progress-bar {
+  background: var(--soft);
+}
+progress::-webkit-progress-value {
+  background: var(--purple);
+  transition: width 0.24s;
+}
+progress::-moz-progress-bar {
+  background: var(--purple);
+}

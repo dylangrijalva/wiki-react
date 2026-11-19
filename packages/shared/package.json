@@ -4,7 +4,12 @@
   "type": "module",
   "exports": {
     ".": "./src/types.ts",
-    "./content": "./src/content/index.ts"
+    "./content": "./src/content/index.ts",
+    "./contracts/auth": "./src/contracts/auth.ts",
+    "./contracts/catalog": "./src/contracts/catalog.ts",
+    "./contracts/progress": "./src/contracts/progress.ts",
+    "./contracts/bookmarks": "./src/contracts/bookmarks.ts",
+    "./contracts/http": "./src/contracts/http.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

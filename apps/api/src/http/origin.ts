@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'hono'
-import { ApiError } from '../routes/errors'
+import { ApiError } from './errors'
 
 export function sameOriginWrites(secure: boolean, publicOrigin?: string): MiddlewareHandler {
   const configured = publicOrigin ? new URL(publicOrigin).origin : undefined

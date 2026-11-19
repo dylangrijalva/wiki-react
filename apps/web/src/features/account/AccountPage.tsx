@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useIsMutating } from '@tanstack/react-query'
-import { loginCredentialsSchema, registrationCredentialsSchema } from '@rendered/shared'
+import {
+  loginCredentialsSchema,
+  registrationCredentialsSchema,
+} from '@rendered/shared/contracts/auth'
 import { ArrowRight, Eye, EyeOff, LogOut } from 'lucide-react'
-import { changeSession, useSession } from '../../lib/session'
+import { changeSession, useSession } from './session'
 import './account.css'
 
 type Mode = 'login' | 'register' | 'account'

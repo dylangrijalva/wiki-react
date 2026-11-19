@@ -85,21 +85,29 @@ The opening lesson has an illustrated player tree. Six lessons also have an **Ex
 ```text
 apps/
   web/src/
-    app/                    Navigation, routing shell, theme controls
-    components/             Brand and original isometric artwork
-    features/               Homepage, curriculum, player, search, progress, and accounts
+    app/routes.tsx          Browser routes and the lazy-loaded lesson page
+    app/Shell.tsx           Site navigation and theme controls
+    features/               Pages, query hooks, styles, and tests grouped by feature
       visualizations/       Scene layout, diagrams, and six experiments
-    lib/api.ts              Query hooks and learner updates
-    styles/                 Fonts, tokens, and shared styles
+    components/             Brand and shared illustrations
+    lib/http.ts             Cookie-aware requests and response validation
+    styles/                 Fonts, theme tokens, and shared styles
   api/
-    drizzle/                Versioned SQL migrations
-    src/db/                 Schema, migration runner, and curriculum seed
-    src/routes/             Catalog, search, sign-in, sessions, and learner records
-packages/shared/src/        TypeScript contracts and authored lesson content
+    src/app.ts              Mounts the API routers and serves the built site
+    src/features/           Auth, bookmarks, catalog, and progress routers and services
+    src/http/               Error responses, cache headers, and origin checks
+    src/db/                 Database schema, migration runner, and curriculum seed
+    drizzle/                Versioned SQLite migrations
+    test/                   API integration tests
+packages/shared/src/
+  contracts/                Zod schemas and TypeScript types, grouped by API feature
+  content/                  Authored tracks, lessons, and scene data
 tests/                      Playwright learning flows and isolated test server
 docs/                       Artwork, server operations, and contributor guide
 screenshots/                Captures from the running application
 ```
+
+For example, the progress endpoints are declared in `apps/api/src/features/progress/progress.router.ts`. The router checks each update against `progressUpdateSchema` and the lesson’s step count. The service in the same folder saves the update. The web hooks in `apps/web/src/features/progress/queries.ts` read their response schema from the same `@rendered/shared/contracts/progress` module.
 
 ## Commands and configuration
 

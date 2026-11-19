@@ -1,4 +1,4 @@
-import type { Lesson } from '../types.js'
+import type { Lesson } from '../contracts/catalog.js'
 import { fundamentals } from './fundamentals.js'
 import { state } from './state.js'
 import { effects } from './effects.js'

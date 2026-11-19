@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Search, CornerDownLeft, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useLessons, useSearch } from '../../lib/api'
+import { useLessons } from '../curriculum/queries'
+import { useSearch } from './queries'
+
+import './palette.css'
 
 export default function Palette({ close }: { close: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)

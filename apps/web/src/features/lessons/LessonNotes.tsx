@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import { Check, CheckCircle2, Code2, ExternalLink, Lightbulb, TriangleAlert } from 'lucide-react'
-import type { Lesson, Step } from '@rendered/shared'
+import type { Lesson, Step } from '@rendered/shared/contracts/catalog'
 
 function highlight(code: string) {
   return code

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { matchesLesson } from './Curriculum'
-import type { LessonSummary, Progress } from '@rendered/shared'
+import type { LessonSummary } from '@rendered/shared/contracts/catalog'
+import type { Progress } from '@rendered/shared/contracts/progress'
 const row: LessonSummary = {
   slug: 'jsx-components-props',
   title: 'JSX and props',

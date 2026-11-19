@@ -1,5 +1,5 @@
 import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import type { Lesson, Track } from '@rendered/shared'
+import type { Lesson, Track } from '@rendered/shared/contracts/catalog'
 
 export const trackTable = sqliteTable('tracks', {
   id: text('id').primaryKey(),

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { FlaskConical } from 'lucide-react'
-import type { Step, Lesson } from '@rendered/shared'
+import type { Step, Lesson } from '@rendered/shared/contracts/catalog'
 import { SceneDiagram } from '../SceneDiagram'
 
 export type Node = Step['scene']['nodes'][number]

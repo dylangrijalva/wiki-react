@@ -1,4 +1,4 @@
-import type { Lesson, Step } from '@rendered/shared'
+import type { Lesson, Step } from '@rendered/shared/contracts/catalog'
 
 type Scene = Step['scene']
 export type Point = { x: number; y: number }

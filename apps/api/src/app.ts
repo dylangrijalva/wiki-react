@@ -2,11 +2,13 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import type { Database } from './db/database'
-import { catalogRoutes } from './routes/catalog'
-import { ApiError } from './routes/errors'
-import { authRoutes } from './routes/auth'
-import { sameOriginWrites } from './auth/origin'
-import { learnerRoutes } from './routes/learner'
+import { authRouter } from './features/auth/auth.router'
+import { bookmarksRouter } from './features/bookmarks/bookmarks.router'
+import { catalogRouter } from './features/catalog/catalog.router'
+import { progressRouter } from './features/progress/progress.router'
+import { apiErrorHandler } from './http/errors'
+import { sameOriginWrites } from './http/origin'
+import { privateResponse } from './http/private-response'
 
 export function createApp(
   db: Database,
@@ -19,14 +21,15 @@ export function createApp(
 ) {
   const app = new Hono()
   app.use('/api/*', sameOriginWrites(secure, publicOrigin))
-  app.route('/api/auth', authRoutes(db, secure, trustedProxyIp))
+  app.route('/api/auth', authRouter(db, secure, trustedProxyIp))
   app.get('/api/health', async (c) => {
     await db.get(sql`SELECT 1`)
     return c.json({ status: 'ok' })
   })
-  app.route('/api', catalogRoutes(db))
-  app.route('/api', learnerRoutes(db, secure))
-  app.all('/api/*', (c) =>
+  app.route('/api', catalogRouter(db))
+  app.route('/api/progress', progressRouter(db, secure))
+  app.route('/api/bookmarks', bookmarksRouter(db, secure))
+  app.all('/api/*', privateResponse, (c) =>
     c.json({ error: { code: 'not_found', message: 'Unknown API endpoint.' } }, 404),
   )
 
@@ -39,15 +42,6 @@ export function createApp(
       return shell(c, next)
     })
   }
-  app.onError((error, c) => {
-    if (error instanceof ApiError) {
-      return c.json({ error: { code: error.code, message: error.message } }, error.status)
-    }
-    console.error(error)
-    return c.json(
-      { error: { code: 'internal_error', message: 'The server could not finish this request.' } },
-      500,
-    )
-  })
+  app.onError(apiErrorHandler)
   return app
 }

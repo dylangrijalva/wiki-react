@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import type { SceneNode } from '@rendered/shared'
+import type { SceneNode } from '@rendered/shared/contracts/catalog'
 import { useCompactDiagram } from '../useCompactDiagram'
 import { statusLabels } from '../SceneDiagram'
 

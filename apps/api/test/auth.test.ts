@@ -353,7 +353,6 @@ describe('learner accounts', () => {
         )
 
       expect((await registerThroughProxy(account.email, '192.0.2.1')).status).toBe(201)
-      // A registration creates one address budget. Start this client at the limit.
       await store.db.update(authAttempts).set({ attempts: 10 })
       expect((await registerThroughProxy(account.email, '192.0.2.1')).status).toBe(429)
       const otherClient = await registerThroughProxy(

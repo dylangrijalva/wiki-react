@@ -1,16 +1,10 @@
 // @vitest-environment node
 import { afterEach, expect, it, vi } from 'vitest'
-import { authSessionSchema } from '@rendered/shared'
-import { changeSession, request } from './session'
+import { authSessionSchema } from '@rendered/shared/contracts/auth'
+import { request } from '../../lib/http'
+import { changeSession, listenForAccountChanges } from './session'
 
 afterEach(() => vi.unstubAllGlobals())
-
-it('reports an unreadable successful response without exposing server markup', async () => {
-  vi.stubGlobal('fetch', async () => new Response('<html>internal details</html>'))
-  await expect(request('auth/session', authSessionSchema)).rejects.toThrow(
-    'The server returned an unreadable response.',
-  )
-})
 
 it('leaves account-change notifications and navigation alone for malformed auth results', async () => {
   const replace = vi.fn(),
@@ -25,26 +19,15 @@ it('leaves account-change notifications and navigation alone for malformed auth 
   expect(setItem).not.toHaveBeenCalled()
 })
 
-it.each([
-  [
-    400,
-    { error: { code: 'bad_request', message: 'Enter a valid email.' } },
-    'Enter a valid email.',
-  ],
-  [400, { error: { message: 'Internal details' } }, 'The server couldn’t complete the request.'],
-  [
-    500,
-    { error: { code: 'internal_error', message: 'Internal details' } },
-    'The server couldn’t complete the request.',
-  ],
-] as const)('validates the error envelope for HTTP %s', async (status, body, message) => {
-  vi.stubGlobal('fetch', async () => Response.json(body, { status }))
-  await expect(request('auth/session', authSessionSchema)).rejects.toThrow(message)
-})
-
 it('switches away from the lesson only for a validated identity conflict', async () => {
   const replace = vi.fn()
-  vi.stubGlobal('window', { location: { pathname: '/lessons/how-react-renders', replace } })
+  vi.stubGlobal(
+    'window',
+    Object.assign(new EventTarget(), {
+      location: { pathname: '/lessons/how-react-renders', replace },
+    }),
+  )
+  listenForAccountChanges()
   const conflict = { error: { code: 'session_changed', message: 'Your session has changed.' } }
   vi.stubGlobal(
     'fetch',

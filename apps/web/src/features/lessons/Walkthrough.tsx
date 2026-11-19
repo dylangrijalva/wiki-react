@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { ArrowLeft, ArrowRight, FlaskConical, Pause, Play, RotateCcw, Workflow } from 'lucide-react'
-import type { Lesson } from '@rendered/shared'
+import type { Lesson } from '@rendered/shared/contracts/catalog'
 import { SceneDiagram } from '../visualizations/SceneDiagram'
 import { RenderBench } from '../visualizations/RenderBench'
 import { Experiment, hasExperiment } from '../visualizations/Experiments'

@@ -1,4 +1,4 @@
-import type { Lesson } from '../types.js'
+import type { Lesson } from '../contracts/catalog.js'
 import { node, step } from './scene.js'
 
 export const effects: Lesson[] = [
@@ -178,7 +178,7 @@ export const effects: Lesson[] = [
       step(
         'Watch the Shift key',
         'Both the mixer and the editor need to know whether Shift is down. Writing the keydown and keyup handlers in each component would duplicate the same work.',
-        'function Mixer() {\n  const [shift, setShift] = useState(false);\n  // Subscribe to key events.\n}',
+        'const [shift, setShift] = useState(false);\nconst readShift = (event: KeyboardEvent) => setShift(event.shiftKey);',
         [
           node('mixer', 'Mixer', 'active', 'key events'),
           node('editor', 'Editor', 'active', 'key events'),
@@ -187,7 +187,7 @@ export const effects: Lesson[] = [
       step(
         'Write useShiftHeld',
         'Give the hook a name that starts with use and return a boolean for the current key state. Call the hook at the top level so its order stays the same on every render.',
-        'function useShiftHeld() {\n  const [held, setHeld] = useState(false);\n  // Install the subscription below.\n  return held;\n}',
+        'function useShiftHeld() {\n  const [held, setHeld] = useState(false);\n  return held;\n}',
         [node('hook', 'useShiftHeld', 'added'), node('held', 'held', 'kept', 'false')],
         [['hook', 'held']],
       ),

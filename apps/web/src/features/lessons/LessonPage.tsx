@@ -10,16 +10,12 @@ import {
   PanelLeftOpen,
 } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import type { Lesson, LessonSummary, Progress, Track } from '@rendered/shared'
-import {
-  useBookmark,
-  useBookmarks,
-  useLesson,
-  useLessons,
-  useProgress,
-  useSaveProgress,
-  useTracks,
-} from '../../lib/api'
+import type { Lesson, LessonSummary, Track } from '@rendered/shared/contracts/catalog'
+import type { Progress } from '@rendered/shared/contracts/progress'
+import { useBookmark, useBookmarks } from '../bookmarks/queries'
+import { useLesson } from './queries'
+import { useLessons, useTracks } from '../curriculum/queries'
+import { useProgress, useSaveProgress } from '../progress/queries'
 import { Walkthrough } from './Walkthrough'
 import { LessonNotes, KnowledgeCheck } from './LessonNotes'
 import { LessonNavigation } from './LessonNavigation'

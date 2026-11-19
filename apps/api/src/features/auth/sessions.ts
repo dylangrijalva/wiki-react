@@ -2,9 +2,9 @@ import { createHash, randomBytes } from 'node:crypto'
 import { and, eq, gt } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
-import type { Database } from '../db/database'
-import { accounts, accountSessions, learners } from '../db/schema'
-import { ApiError } from '../routes/errors'
+import type { Database } from '../../db/database'
+import { accounts, accountSessions, learners } from '../../db/schema'
+import { ApiError } from '../../http/errors'
 
 export const sessionLifetime = 30 * 24 * 60 * 60
 export const digest = (value: string) => createHash('sha256').update(value).digest('hex')

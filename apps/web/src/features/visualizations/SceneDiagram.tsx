@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import type { Lesson, Step } from '@rendered/shared'
+import type { Lesson, Step } from '@rendered/shared/contracts/catalog'
 import { useCompactDiagram } from './useCompactDiagram'
 import { connector, layoutScene, nodeHeight, nodeWidth, wrap } from './scene-layout'
 

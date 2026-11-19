@@ -19,7 +19,6 @@ export function Atom({ radius = 22 }: { radius?: number }) {
     </g>
   )
 }
-/** A square face projected onto the same two axes as its side walls. */
 export function Tile({
   x = 0,
   y = 0,

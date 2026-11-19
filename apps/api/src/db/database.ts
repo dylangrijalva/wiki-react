@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import { migrate } from 'drizzle-orm/libsql/migrator'
-import type { Lesson, Track } from '@rendered/shared'
+import type { Lesson, Track } from '@rendered/shared/contracts/catalog'
 import { paths } from '../paths'
 import { lessonTable, trackTable } from './schema'
 
