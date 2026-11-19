@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useIsMutating } from '@tanstack/react-query'
+import { loginCredentialsSchema, registrationCredentialsSchema } from '@rendered/shared'
 import { ArrowRight, Eye, EyeOff, LogOut } from 'lucide-react'
 import { changeSession, useSession } from '../../lib/session'
 import './account.css'
@@ -21,23 +22,24 @@ export default function AccountPage({ mode }: { mode: Mode }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (busy || writes) return
-    const fields = new FormData(event.currentTarget)
-    const password = String(fields.get('password') ?? '')
-    const length = [...password].length
-    if (registering && (length < 15 || length > 128)) {
-      setError('Choose a password with 15 to 128 characters.')
-      event.currentTarget.querySelector<HTMLInputElement>('[name="password"]')?.focus()
+    const form = event.currentTarget
+    const fields = new FormData(form)
+    const schema = registering ? registrationCredentialsSchema : loginCredentialsSchema
+    const credentials =
+      mode === 'account'
+        ? undefined
+        : schema.safeParse({ email: fields.get('email'), password: fields.get('password') })
+    if (credentials && !credentials.success) {
+      const issue = credentials.error.issues[0]
+      setError(issue.message)
+      const field = form.elements.namedItem(String(issue.path[0]))
+      if (field instanceof HTMLInputElement) field.focus()
       return
     }
     setBusy(true)
     setError('')
     try {
-      if (mode === 'account') await changeSession('logout')
-      else
-        await changeSession(mode, {
-          email: String(fields.get('email')).trim(),
-          password,
-        })
+      await changeSession(mode === 'account' ? 'logout' : mode, credentials?.data)
     } catch (cause) {
       setError(
         cause instanceof TypeError

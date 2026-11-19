@@ -93,6 +93,9 @@ importers:
       react-router-dom:
         specifier: ^7.12.0
         version: 7.18.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.1.18
@@ -125,7 +128,11 @@ importers:
         specifier: ^4.0.16
         version: 4.1.12(@types/node@24.19.2)(jsdom@26.1.0)(vite@7.3.8(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15))
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
 
 packages:
 

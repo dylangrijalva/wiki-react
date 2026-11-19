@@ -1,9 +1,12 @@
 import { randomUUID } from 'node:crypto'
-import type { AuthSession } from '@rendered/shared'
+import {
+  loginCredentialsSchema,
+  registrationCredentialsSchema,
+  type AuthSession,
+} from '@rendered/shared'
 import { and, eq, inArray, lte, or } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
-import { z } from 'zod'
 import { credentialLimits } from '../auth/limits'
 import { hashPassword, matchesPassword } from '../auth/passwords'
 import { learnerSessions, newToken, sessionLifetime } from '../auth/sessions'
@@ -11,28 +14,29 @@ import type { Database } from '../db/database'
 import { accounts, accountSessions, bookmarks, learners, progress } from '../db/schema'
 import { ApiError } from './errors'
 
-const credentials = z.strictObject({
-  email: z.string().trim().toLowerCase().max(254).pipe(z.email()),
-  password: z
-    .string()
-    .min(1)
-    .refine((value) => [...value].length <= 128),
-})
-
-async function readCredentials(c: Context, register: boolean) {
+async function readCredentials(
+  c: Context,
+  schema: typeof loginCredentialsSchema | typeof registrationCredentialsSchema,
+) {
   if (c.req.header('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json')
     throw new ApiError(415, 'json_required', 'Send credentials as JSON.')
-  const parsed = credentials.safeParse(await c.req.json<unknown>().catch(() => null))
-  if (!parsed.success)
-    throw new ApiError(
-      400,
-      'invalid_credentials_format',
-      'Enter a valid email address and a password of up to 128 characters.',
-    )
-  if (register && [...parsed.data.password].length < 15) {
+  const parsed = schema.safeParse(await c.req.json<unknown>().catch(() => null))
+  if (parsed.success) return parsed.data
+
+  const issues = parsed.error.issues
+  const first = issues[0]
+  if (
+    issues.length === 1 &&
+    first.code === 'custom' &&
+    first.params?.reason === 'short_registration_password'
+  ) {
     throw new ApiError(400, 'invalid_password', 'Use a password with 15 to 128 characters.')
   }
-  return parsed.data
+  throw new ApiError(
+    400,
+    'invalid_credentials_format',
+    'Enter a valid email address and a password of up to 128 characters.',
+  )
 }
 
 function transferGuestRecords(db: Database, guestId: string | undefined, accountId: string) {
@@ -91,7 +95,7 @@ export function authRoutes(db: Database, secure: boolean, trustedProxyIp?: strin
   app.post('/register', limitBody, async (c) => {
     if (await sessions.account(c))
       throw new ApiError(409, 'already_signed_in', 'Sign out before creating another account.')
-    const { email, password } = await readCredentials(c, true)
+    const { email, password } = await readCredentials(c, registrationCredentialsSchema)
     return limits.run(c, 'register', email, async () => {
       const id = randomUUID()
       const passwordHash = await hashPassword(password)
@@ -118,7 +122,7 @@ export function authRoutes(db: Database, secure: boolean, trustedProxyIp?: strin
   })
 
   app.post('/login', limitBody, async (c) => {
-    const { email, password } = await readCredentials(c, false)
+    const { email, password } = await readCredentials(c, loginCredentialsSchema)
     return limits.run(c, 'login', email, async () => {
       const account = await db.select().from(accounts).where(eq(accounts.email, email)).get()
       if (!(await matchesPassword(password, account?.passwordHash)) || !account) {

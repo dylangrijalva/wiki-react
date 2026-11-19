@@ -1,5 +1,5 @@
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
-import { z } from 'zod'
+import { slugSchema } from '@rendered/shared'
 
 export class ApiError extends Error {
   constructor(
@@ -12,11 +12,7 @@ export class ApiError extends Error {
 }
 
 export function parseSlug(value: string) {
-  const parsed = z
-    .string()
-    .max(120)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .safeParse(value)
+  const parsed = slugSchema.safeParse(value)
   if (!parsed.success) throw new ApiError(400, 'invalid_lesson_id', 'Use a valid lesson slug.')
   return parsed.data
 }

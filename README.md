@@ -74,7 +74,7 @@ flowchart LR
 
 React and strict TypeScript drive the interface. Tailwind CSS v4, semantic color tokens, local font files, and Lucide icons are shared across the site. React state handles individual controls. TanStack Query caches course data, reads learner records, and serializes progress writes.
 
-The Hono API validates incoming updates with Zod. Drizzle records the resume step, visited steps, completion, and bookmarks. SQLite holds salted password hashes and the digests of session tokens. The browser sends the token in an HttpOnly cookie. Signing out ends that browser’s account session.
+The sign-in and registration forms use the same Zod schemas as the API. The browser also checks lessons, progress, bookmarks, and session responses before it uses them. Drizzle records the resume step, visited steps, completion, and bookmarks. SQLite holds salted password hashes and the digests of session tokens. The browser sends the token in an HttpOnly cookie. Signing out ends that browser’s account session.
 
 ### How the diagrams work
 

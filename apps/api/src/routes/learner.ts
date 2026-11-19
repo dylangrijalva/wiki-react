@@ -2,7 +2,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
 import { z } from 'zod'
-import type { Progress } from '@rendered/shared'
+import { bookmarkListSchema, progressListSchema, progressSchema } from '@rendered/shared'
 import type { Database } from '../db/database'
 import { bookmarks, lessonTable, progress } from '../db/schema'
 import { ApiError, lessonNotFound, parseSlug } from './errors'
@@ -39,13 +39,13 @@ export function learnerRoutes(db: Database, secure: boolean) {
   })
   app.get('/progress', async (c) => {
     const id = await sessions.owner(c, true)
-    const rows: Progress[] = await db
+    const rows = await db
       .select(progressFields)
       .from(progress)
       .innerJoin(lessonTable, eq(progress.lessonId, lessonTable.slug))
       .where(and(eq(progress.learnerId, id), gte(lessonTable.position, 0)))
       .orderBy(desc(progress.updatedAt))
-    return c.json(rows)
+    return c.json(progressListSchema.parse(rows))
   })
 
   app.put(
@@ -68,12 +68,25 @@ export function learnerRoutes(db: Database, secure: boolean) {
           'Choose a step in this lesson and a boolean completion flag.',
         )
       }
+      const previous = await db
+        .select({ visited: progress.visitedSteps })
+        .from(progress)
+        .where(and(eq(progress.learnerId, id), eq(progress.lessonId, slug)))
+        .get()
+      if (previous) progressSchema.shape.visitedSteps.parse(previous.visited)
       const { step, completed = false } = parsed.data
       const updatedAt = new Date().toISOString()
       // Merge at write time so concurrent requests retain every visit and a completed lesson stays complete.
       const result = await db
         .insert(progress)
-        .values({ learnerId: id, lessonId: slug, step, completed, visitedSteps: [step], updatedAt })
+        .values({
+          learnerId: id,
+          lessonId: slug,
+          step,
+          completed,
+          visitedSteps: [step],
+          updatedAt,
+        })
         .onConflictDoUpdate({
           target: [progress.learnerId, progress.lessonId],
           set: {
@@ -85,7 +98,7 @@ export function learnerRoutes(db: Database, secure: boolean) {
         })
         .returning(progressFields)
         .get()
-      return c.json(result)
+      return c.json(progressSchema.parse(result))
     },
   )
 
@@ -97,7 +110,7 @@ export function learnerRoutes(db: Database, secure: boolean) {
       .innerJoin(lessonTable, eq(lessonTable.slug, bookmarks.lessonId))
       .where(and(eq(bookmarks.learnerId, id), gte(lessonTable.position, 0)))
       .orderBy(lessonTable.position)
-    return c.json(rows.map((row) => row.lessonId))
+    return c.json(bookmarkListSchema.parse(rows.map((row) => row.lessonId)))
   })
   app.on(['POST', 'DELETE'], '/bookmarks/:slug', async (c) => {
     const id = await sessions.owner(c, false)

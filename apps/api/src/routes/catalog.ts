@@ -1,7 +1,7 @@
 import { and, asc, eq, gte } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { LessonSummary } from '@rendered/shared'
+import { lessonSchema, lessonSummaryListSchema, trackListSchema } from '@rendered/shared'
 import type { Database } from '../db/database'
 import { lessonTable, trackTable } from '../db/schema'
 import { ApiError, lessonNotFound, parseSlug } from './errors'
@@ -16,12 +16,13 @@ const summary = {
 
 export function catalogRoutes(db: Database) {
   const app = new Hono()
-  function listLessons(): PromiseLike<LessonSummary[]> {
-    return db
+  async function listLessons() {
+    const rows = await db
       .select(summary)
       .from(lessonTable)
       .where(gte(lessonTable.position, 0))
       .orderBy(asc(lessonTable.position))
+    return lessonSummaryListSchema.parse(rows)
   }
 
   app.get('/tracks', async (c) => {
@@ -30,7 +31,7 @@ export function catalogRoutes(db: Database) {
       .from(trackTable)
       .where(gte(trackTable.position, 0))
       .orderBy(asc(trackTable.position))
-    return c.json(rows.map((row) => row.track))
+    return c.json(trackListSchema.parse(rows.map((row) => row.track)))
   })
 
   app.get('/lessons', async (c) => c.json(await listLessons()))
@@ -42,7 +43,7 @@ export function catalogRoutes(db: Database) {
       .where(and(eq(lessonTable.slug, slug), gte(lessonTable.position, 0)))
       .get()
     if (!row) throw lessonNotFound()
-    return c.json(row.lesson)
+    return c.json(lessonSchema.parse(row.lesson))
   })
   app.get('/search', async (c) => {
     const query = z

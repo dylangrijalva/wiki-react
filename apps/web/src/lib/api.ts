@@ -1,39 +1,53 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Lesson, LessonSummary, Progress, Track } from '@rendered/shared'
+import {
+  bookmarkListSchema,
+  bookmarkResultSchema,
+  lessonSchema,
+  lessonSummaryListSchema,
+  progressListSchema,
+  progressSchema,
+  trackListSchema,
+  type Progress,
+} from '@rendered/shared'
+import type { ZodType } from 'zod'
 import { request, useSession } from './session'
 
 export const useTracks = () =>
-  useQuery({ queryKey: ['tracks'], queryFn: () => request<Track[]>('tracks'), staleTime: Infinity })
+  useQuery({
+    queryKey: ['tracks'],
+    queryFn: () => request('tracks', trackListSchema),
+    staleTime: Infinity,
+  })
 export const useLessons = () =>
   useQuery({
     queryKey: ['lessons'],
-    queryFn: () => request<LessonSummary[]>('lessons'),
+    queryFn: () => request('lessons', lessonSummaryListSchema),
     staleTime: Infinity,
   })
 export const useLesson = (slug: string) =>
   useQuery({
     queryKey: ['lesson', slug],
-    queryFn: () => request<Lesson>('lessons/' + encodeURIComponent(slug)),
+    queryFn: () => request('lessons/' + encodeURIComponent(slug), lessonSchema),
     staleTime: Infinity,
   })
 export const useSearch = (q: string) =>
   useQuery({
     queryKey: ['search', q],
-    queryFn: () => request<LessonSummary[]>('search?q=' + encodeURIComponent(q)),
+    queryFn: () => request('search?q=' + encodeURIComponent(q), lessonSummaryListSchema),
     enabled: !!q.trim(),
     staleTime: 60000,
   })
 
-function privateRequest<T>(email: string, path: string, init?: RequestInit) {
+function privateRequest<T>(email: string, path: string, schema: ZodType<T>, init?: RequestInit) {
   const headers = new Headers(init?.headers)
   headers.set('X-Expected-Account', encodeURIComponent(email))
-  return request<T>(path, { ...init, cache: 'no-store', headers })
+  return request(path, schema, { ...init, cache: 'no-store', headers })
 }
 
 function progressOptions(email: string) {
   return queryOptions({
     queryKey: ['progress', email],
-    queryFn: ({ signal }) => privateRequest<Progress[]>(email, 'progress', { signal }),
+    queryFn: ({ signal }) => privateRequest(email, 'progress', progressListSchema, { signal }),
     staleTime: 30000,
   })
 }
@@ -51,7 +65,7 @@ export function useBookmarks() {
   const progress = useProgress()
   return useQuery({
     queryKey: ['bookmarks', email],
-    queryFn: ({ signal }) => privateRequest<string[]>(email, 'bookmarks', { signal }),
+    queryFn: ({ signal }) => privateRequest(email, 'bookmarks', bookmarkListSchema, { signal }),
     enabled: session.isSuccess && progress.isSuccess,
   })
 }
@@ -71,7 +85,7 @@ export function useSaveProgress() {
       completed?: boolean
     }) => {
       await client.ensureQueryData(progressOptions(email))
-      return privateRequest<Progress>(email, 'progress/' + encodeURIComponent(slug), {
+      return privateRequest(email, 'progress/' + encodeURIComponent(slug), progressSchema, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step, completed }),
@@ -92,7 +106,7 @@ export function useBookmark() {
     scope: { id: 'bookmark-writes' },
     mutationFn: async ({ slug, bookmarked }: { slug: string; bookmarked: boolean }) => {
       await client.ensureQueryData(progressOptions(email))
-      await privateRequest(email, 'bookmarks/' + encodeURIComponent(slug), {
+      await privateRequest(email, 'bookmarks/' + encodeURIComponent(slug), bookmarkResultSchema, {
         method: bookmarked ? 'POST' : 'DELETE',
       })
     },

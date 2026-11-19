@@ -241,15 +241,29 @@ describe('learner accounts', () => {
   })
 
   it('validates email and password length before creating a learner account', async () => {
-    for (const input of [
-      { ...account, email: 'nami' },
-      { ...account, password: 'a'.repeat(14) },
-      { ...account, password: 'a'.repeat(129) },
-    ]) {
+    const shortPassword = {
+      code: 'invalid_password',
+      message: 'Use a password with 15 to 128 characters.',
+    }
+    const malformed = {
+      code: 'invalid_credentials_format',
+      message: 'Enter a valid email address and a password of up to 128 characters.',
+    }
+    for (const [input, error] of [
+      [{ ...account, email: 'nami' }, malformed],
+      [{ ...account, password: 'a'.repeat(14) }, shortPassword],
+      [{ ...account, password: '' }, malformed],
+      [{ ...account, password: 'a'.repeat(129) }, malformed],
+      [{ email: 'nami', password: 'short' }, malformed],
+      [{ ...account, password: 'short', extra: true }, malformed],
+    ] as const) {
       const response = await request('/auth/register', 'POST', '', input)
       expect(response.status).toBe(400)
-      expect(await response.json()).toMatchObject({ error: { code: expect.any(String) } })
+      expect(await response.json()).toEqual({ error })
     }
+    const login = await request('/auth/login', 'POST', '', { ...account, password: 'short' })
+    expect(login.status).toBe(401)
+    expect(await login.json()).toMatchObject({ error: { code: 'invalid_credentials' } })
     const minimum = await request('/auth/register', 'POST', '', {
       ...account,
       password: 'a'.repeat(15),

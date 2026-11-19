@@ -1,7 +1,8 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { sql } from 'drizzle-orm'
 import type { Lesson, LessonSummary, Progress } from '@rendered/shared'
 import { tracks, lessons } from '@rendered/shared/content'
 import { createApp } from '../src/app'
@@ -57,6 +58,28 @@ describe('course catalog', () => {
     expect((await app.request('/api/lessons/unpublished')).status).toBe(404)
   })
 
+  it('returns the API error envelope if SQLite contains an invalid catalog record', async () => {
+    await store.db.run(sql`UPDATE tracks SET content = '{}' WHERE id = 'fundamentals'`)
+    await store.db.run(sql`UPDATE lessons SET step_count = -1, content = '{}' WHERE slug = ${slug}`)
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      for (const path of [
+        '/api/tracks',
+        '/api/lessons',
+        '/api/search?q=renders',
+        '/api/lessons/' + slug,
+      ]) {
+        const response = await app.request(path)
+        expect(response.status).toBe(500)
+        expect(await response.json()).toEqual({
+          error: { code: 'internal_error', message: 'The server could not finish this request.' },
+        })
+      }
+    } finally {
+      log.mockRestore()
+    }
+  })
+
   it('serves browser routes on reload while missing API and asset requests stay 404', async () => {
     const webRoot = join(directory, 'web')
     await mkdir(webRoot)
@@ -97,6 +120,42 @@ describe('anonymous learning records', () => {
       visitedSteps: [0, 1, 2, 3],
     })
     expect(Number.isFinite(Date.parse(records[0].updatedAt))).toBe(true)
+  })
+
+  it('rejects invalid stored step history on a read and on a save', async () => {
+    const cookie = await startGuest()
+    expect((await update(cookie, 0)).status).toBe(200)
+    await store.db.run(
+      sql`UPDATE progress SET visited_steps = '[0, "broken"]', updated_at = '2020-01-01T00:00:00.000Z' WHERE lesson_id = ${slug}`,
+    )
+    const storedRecord = () =>
+      store.db.get(
+        sql`SELECT step, completed, visited_steps, updated_at FROM progress WHERE lesson_id = ${slug}`,
+      )
+    const before = await storedRecord()
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const read = await app.request('/api/progress', { headers: { cookie } })
+      const save = await update(cookie, 1, true)
+      for (const response of [read, save]) {
+        expect(response.status).toBe(500)
+        expect(await response.json()).toEqual({
+          error: { code: 'internal_error', message: 'The server could not finish this request.' },
+        })
+      }
+      expect(await storedRecord()).toEqual(before)
+    } finally {
+      log.mockRestore()
+    }
+  })
+
+  it('can restore a missing resume step when the previous visit array is valid', async () => {
+    const cookie = await startGuest()
+    await update(cookie, 0)
+    await store.db.run(sql`UPDATE progress SET visited_steps = '[2]' WHERE lesson_id = ${slug}`)
+    const response = await update(cookie, 0, true)
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ step: 0, completed: true, visitedSteps: [0, 2] })
   })
 
   it('scopes idempotent bookmarks to a guest and rejects unknown lessons', async () => {

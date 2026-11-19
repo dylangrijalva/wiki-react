@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import type { AuthSession } from '@rendered/shared'
+import { apiErrorSchema, authSessionSchema } from '@rendered/shared'
+import type { ZodType } from 'zod'
 export type AuthAction = 'register' | 'login' | 'logout'
 const eventKey = 'rendered-account-change'
 let priorEmail: string | null | undefined
@@ -19,24 +20,37 @@ function refreshIdentity() {
   switchPage(window.location.pathname.startsWith('/lessons/') ? '/progress' : undefined)
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, schema: ZodType<T>, init?: RequestInit): Promise<T> {
   const response = await fetch('/api/' + path, { ...init, credentials: 'same-origin' })
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    if (response.status === 409 && body?.error?.code === 'session_changed') refreshIdentity()
+  const failure = 'The server couldn’t complete the request. Please try again.'
+  if (response.status >= 500) throw new Error(failure)
+
+  let body: unknown
+  try {
+    body = await response.json()
+  } catch (error) {
+    if (init?.signal?.aborted) throw error
     throw new Error(
-      typeof body?.error?.message === 'string' && response.status < 500
-        ? body.error.message
-        : 'The server couldn’t complete the request. Please try again.',
+      response.ok ? 'The server returned an unreadable response. Please try again.' : failure,
     )
   }
-  return response.json() as Promise<T>
+
+  if (!response.ok) {
+    const result = apiErrorSchema.safeParse(body)
+    if (!result.success) throw new Error(failure)
+    if (response.status === 409 && result.data.error.code === 'session_changed') refreshIdentity()
+    throw new Error(result.data.error.message)
+  }
+  const result = schema.safeParse(body)
+  if (!result.success)
+    throw new Error('The server returned an unexpected response. Please try again.')
+  return result.data
 }
 
 export const sessionOptions = queryOptions({
   queryKey: ['session'],
   queryFn: async ({ signal }) => {
-    const session = await request<AuthSession>('auth/session', { signal, cache: 'no-store' })
+    const session = await request('auth/session', authSessionSchema, { signal, cache: 'no-store' })
     const email = session.user?.email ?? null
     if (priorEmail !== undefined && priorEmail !== email) refreshIdentity()
     priorEmail = email
@@ -66,7 +80,7 @@ export async function changeSession(
   action: AuthAction,
   credentials?: { email: string; password: string },
 ) {
-  const session = await request<AuthSession>('auth/' + action, {
+  const session = await request('auth/' + action, authSessionSchema, {
     method: 'POST',
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
