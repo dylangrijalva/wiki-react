@@ -1,15 +1,6 @@
 import { useState } from 'react'
 import { useReducedMotion } from 'motion/react'
-import {
-  ArrowLeft,
-  ArrowRight,
-  FlaskConical,
-  Pause,
-  Play,
-  RotateCcw,
-  ScanLine,
-  Workflow,
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, FlaskConical, Pause, Play, RotateCcw, Workflow } from 'lucide-react'
 import type { Lesson } from '@rendered/shared'
 import { SceneDiagram } from '../visualizations/SceneDiagram'
 import { RenderBench } from '../visualizations/RenderBench'
@@ -83,12 +74,7 @@ export function Walkthrough({
         <Experiment slug={lesson.slug} />
       ) : (
         <div className="rr-canvas" data-paused={paused || reduced}>
-          <div className="rr-fig">
-            <span>
-              <ScanLine size={13} /> FIG. {String(index + 1).padStart(2, '0')}
-            </span>
-            <span>{lesson.mode} view</span>
-          </div>
+          <p className="rr-view-mode">{lesson.mode} view</p>
           {lesson.slug === 'how-react-renders' ? (
             <RenderBench index={index} replay={replay} paused={paused} />
           ) : (
@@ -103,26 +89,20 @@ export function Walkthrough({
         </div>
       )}
       <div className="rr-stage-controls">
-        <div className="rr-step-row">
-          <span>
-            Step {String(index + 1).padStart(2, '0')} /{' '}
-            {String(lesson.steps.length).padStart(2, '0')}
-          </span>
-          <div className="rr-segments">
-            {lesson.steps.map((s, i) => (
-              <button
-                key={s.title}
-                aria-label={`Step ${i + 1}: ${s.title}`}
-                title={s.title}
-                aria-current={i === index ? 'step' : undefined}
-                className={i <= index ? 'viewed' : ''}
-                onClick={() => {
-                  setLab(false)
-                  onStep(i)
-                }}
-              />
-            ))}
-          </div>
+        <div className="rr-segments" role="group" aria-label="Lesson steps">
+          {lesson.steps.map((s, i) => (
+            <button
+              key={s.title}
+              aria-label={s.title}
+              title={s.title}
+              aria-current={i === index ? 'step' : undefined}
+              className={i <= index ? 'viewed' : ''}
+              onClick={() => {
+                setLab(false)
+                onStep(i)
+              }}
+            />
+          ))}
         </div>
         <div className="rr-step-actions">
           <button

@@ -28,24 +28,54 @@
   letter-spacing: 0.13em;
   color: var(--ink);
 }
-.edition-mark {
-  width: 10px;
-  height: 10px;
-  background: #ab89db;
-  border: 1px solid #5f4b72;
-  box-shadow: 2px 2px 0 #ddd0e9;
-  transform: rotate(-9deg);
-}
 .hero h1 {
-  font-size: clamp(2rem, 18cqi, 7rem);
+  font-size: clamp(2rem, 17.6cqi, 7rem);
   letter-spacing: -0.055em;
   line-height: 0.96;
   margin: 30px 0 21px;
   font-weight: 560;
 }
-.hero h1 em {
+.headline-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+}
+.headline-label button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.headline-label button:hover {
+  color: var(--ink);
+  background: var(--soft);
+}
+.headline-line {
+  display: block;
+  height: 1lh;
+  white-space: nowrap;
+}
+.headline-line:last-child {
   color: var(--purple);
-  font-weight: inherit;
+}
+.headline-line[data-caret='true']::after {
+  content: '';
+  display: inline-block;
+  width: 0.035em;
+  height: 0.73em;
+  margin-inline-start: 0.055em;
+  vertical-align: -0.02em;
+  background: currentColor;
+  animation: headline-caret 1.1s step-end infinite;
+}
+@keyframes headline-caret {
+  50% {
+    opacity: 0;
+  }
 }
 .hero-copy > p {
   font-size: clamp(15px, 1.2vw, 19px);
@@ -77,12 +107,6 @@
   width: 13px;
   height: 13px;
 }
-.course-facts i {
-  width: 3px;
-  height: 3px;
-  background: var(--line);
-  border-radius: 50%;
-}
 .render-figure {
   margin: 0;
   align-self: center;
@@ -109,22 +133,10 @@
   background: #f8f7f0;
   border-bottom: 1px solid #c7c9bc;
 }
-.figure-bar span,
 .render-figure figcaption > span {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-.live-dot {
-  width: 7px;
-  height: 7px;
-  background: #8eb392;
-  border: 1px solid #547357;
-  border-radius: 50%;
-}
-.figure-bar span:last-child {
-  font-size: 9px;
-  color: #64675d;
 }
 .figure-field {
   background-color: #f6f5ef;
@@ -199,22 +211,9 @@
   background-image: radial-gradient(#605b651f 0.8px, transparent 0.8px);
   background-size: 11px 11px;
 }
-.track-index,
 .corner-arrow {
   position: absolute;
   top: 13px;
-}
-.track-index {
-  left: 15px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  border: 1px solid #615e635e;
-  background: #ffffff60;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.corner-arrow {
   right: 13px;
   color: #45443b;
 }
@@ -252,6 +251,9 @@
   color: var(--muted);
   padding-top: 18px;
   margin-top: auto;
+}
+.track-meta span {
+  margin-inline-start: auto;
 }
 .feature-section,
 .how {

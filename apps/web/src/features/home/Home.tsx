@@ -13,6 +13,7 @@ import { motion } from 'motion/react'
 import { useLessons, useTracks } from '../../lib/api'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
 import RenderFigure from './RenderFigure'
+import HeroHeadline from './HeroHeadline'
 import './home.css'
 
 const guideSteps = [
@@ -41,15 +42,7 @@ export default function Home() {
     <div className="wrap home">
       <section className="hero">
         <div className="hero-copy">
-          <div className="kicker field-label">
-            <span className="edition-mark" />
-            AN INTERACTIVE FIELD GUIDE
-          </div>
-          <h1 className="display-heading">
-            React, under
-            <br />
-            <em>the hood.</em>
-          </h1>
+          <HeroHeadline />
           <p>
             When a counter goes from 0 to 1, which components run again? Step through a render and
             see what React changes on screen.
@@ -66,12 +59,10 @@ export default function Home() {
             <span>
               <Layers3 />6 learning tracks
             </span>
-            <i />
             <span>
               <BookOpen />
               24 lessons
             </span>
-            <i />
             <span>
               <MousePointer2 />
               Self-paced
@@ -113,7 +104,6 @@ export default function Home() {
               >
                 <Link className="track-card" to={'/curriculum?track=' + t.id}>
                   <div className="track-cover" style={{ backgroundColor: trackPaper(t.id) }}>
-                    <span className="track-index">TRACK {String(i + 1).padStart(2, '0')}</span>
                     <TrackArt id={t.id} />
                     <span className="corner-arrow">
                       <ArrowUpRight size={17} />
@@ -124,8 +114,8 @@ export default function Home() {
                     <p>{t.description}</p>
                     <div className="track-meta">
                       <BookOpen size={13} />
-                      {(lessons.data ?? []).filter((l) => l.trackId === t.id).length ||
-                        4} lessons <span>·</span> {t.difficulty}
+                      {(lessons.data ?? []).filter((l) => l.trackId === t.id).length || 4} lessons
+                      <span>{t.difficulty}</span>
                     </div>
                   </div>
                 </Link>

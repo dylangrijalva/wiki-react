@@ -30,7 +30,7 @@ export default function Composition() {
       <div className="rr-preview" aria-label="Clip preview">
         <AudioLines size={26} />
         {transport && <span aria-label="Playback controls in the preview">◀ ▶ ▶|</span>}
-        {caption && <small>Tape loop 01</small>}
+        {caption && <small>Tape loop</small>}
       </div>
     </Lab>
   )

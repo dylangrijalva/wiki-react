@@ -21,6 +21,25 @@ async function openExperiment(page: Page, slug: string) {
   await page.getByRole('button', { name: 'Experiment', exact: true }).click()
 }
 
+test('rotates the homepage headline and respects reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/')
+  const heading = page.getByRole('heading', { level: 1, name: 'React, under the hood.' })
+  const lines = heading.locator('.headline-line')
+  await expect(lines).toHaveText(['React, under', 'the hood.'])
+  await expect(lines.last()).toHaveCSS('font-style', 'normal')
+  await expect(lines).toHaveText(['Trace a', 'state update.'], { timeout: 10_000 })
+  await page.getByRole('button', { name: 'Pause headline animation' }).click()
+  await expect(heading.locator('[data-caret="true"]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Resume headline animation' }).click()
+  await expect(heading.locator('[data-caret="true"]')).toHaveCount(1)
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(lines).toHaveText(['React, under', 'the hood.'])
+  await expect(heading.locator('[data-caret="true"]')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /headline animation/ })).toHaveCount(0)
+})
+
 test('learn, resume, save, finish the check and revisit from the dashboard', async ({ page }) => {
   const slug = 'how-react-renders'
   await page.goto('/')
@@ -91,7 +110,7 @@ test('learn, resume, save, finish the check and revisit from the dashboard', asy
   await page.getByRole('combobox', { name: 'Completion status' }).selectOption('complete')
   const match = page.locator('.catalog-list').getByRole('link')
   await expect(match).toHaveCount(1)
-  await expect(match).toContainText(lesson.title)
+  await expect(match).toHaveAccessibleName(lesson.title + ' Complete')
   const progress = await (await page.request.get('/api/progress')).json()
   expect(progress).toEqual([
     expect.objectContaining({
@@ -131,7 +150,7 @@ test('compares stable row identities and inserted children', async ({ page }) =>
   await expect(page.getByLabel('Row key')).toHaveValue('id')
   await openExperiment(page, 'component-composition')
   await page.getByRole('button', { name: 'Add caption' }).click()
-  await expect(page.getByText('Tape loop 01', { exact: true })).toBeVisible()
+  await expect(page.getByText('Tape loop', { exact: true })).toBeVisible()
 })
 
 test('changes parent state and observes cleanup before a new setup', async ({ page }) => {
@@ -269,9 +288,8 @@ test('every published lesson changes its visible SVG at each step', async ({ pag
         await expect(page.getByLabel('TypeScript example')).not.toBeEmpty()
       }
       await expect(page.getByRole('button', { name: 'Knowledge check' })).toBeVisible()
-      await expect(page.getByRole('button', { name: /^Step [0-9]+:/ })).toHaveCount(
-        summary.stepCount,
-      )
+      const steps = page.getByRole('group', { name: 'Lesson steps' })
+      await expect(steps.getByRole('button')).toHaveCount(summary.stepCount)
     })
   }
 })

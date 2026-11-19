@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, BookOpen, Bookmark, Compass, Layers3, Check } from 'lucide-react'
+import { ArrowRight, Bookmark, Compass, Check } from 'lucide-react'
 import type { LessonSummary } from '@rendered/shared'
 import { useBookmarks, useProgress, useLessons, useTracks } from '../../lib/api'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
@@ -20,7 +20,6 @@ function ReadingList({
           {rows.map((r) => (
             <li key={r.slug}>
               <Link to={'/lessons/' + r.slug}>
-                <BookOpen size={16} />
                 <span>{r.title}</span>
                 <ArrowRight size={15} />
               </Link>
@@ -131,7 +130,6 @@ export default function ProgressPage() {
         ) : (
           active.map(({ t, all }) => (
             <Link className="active-track" to={'/curriculum?track=' + t.id} key={t.id}>
-              <Layers3 size={17} />
               {t.title}
               <span>
                 {all.filter((l) => completed.has(l.slug)).length} / {all.length} complete

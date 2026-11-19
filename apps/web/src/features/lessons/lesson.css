@@ -23,11 +23,9 @@
 .rr-tools,
 .rr-legend,
 .rr-step-actions,
-.rr-step-row,
 .rr-title-row,
 .rr-lab-actions,
 .rr-finish,
-.rr-fig,
 .rr-source,
 .rr-bookmark,
 .rr-nav-toggle,
@@ -48,9 +46,6 @@
 .rr-source:hover {
   color: var(--accent);
   text-decoration: underline;
-}
-.rr-breadcrumb span {
-  color: var(--ink);
 }
 .rr-workspace {
   display: grid;
@@ -155,13 +150,6 @@
 .rr-nav-track > button > svg {
   margin-left: auto;
 }
-.rr-track-number {
-  font: 10px var(--mono);
-  border: 1px solid #2e2a2940;
-  border-radius: 4px;
-  padding: 2px 4px;
-  color: #2a2925;
-}
 .rr-nav-track ul {
   margin: 0;
   padding: 0 0 10px;
@@ -178,7 +166,7 @@
   border-radius: 5px;
 }
 .rr-nav-track a svg {
-  margin-top: 3px;
+  margin: 3px 0 0 auto;
 }
 .rr-nav-track a:hover {
   background: var(--soft);
@@ -198,26 +186,11 @@
   gap: 12px;
 }
 .rr-track-meta,
-.rr-eyebrow,
-.rr-fig,
-.rr-step-row > span {
+.rr-eyebrow {
   font: 10px/1.45 var(--mono);
   letter-spacing: 0.075em;
   text-transform: uppercase;
   color: var(--muted);
-}
-.rr-track-meta span {
-  width: 10px;
-  height: 10px;
-  border: 1px solid var(--ink);
-  background: var(--track-tint);
-  border-radius: 3px;
-}
-.rr-track-meta i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--muted);
 }
 .rr-bookmark[aria-pressed='true'] {
   color: var(--accent);
@@ -277,7 +250,6 @@
 .rr-step-actions button,
 .rr-code > div,
 .rr-note-detail summary,
-.rr-fig span,
 .rr-finish span,
 .rr-finish a,
 .rr-lab-actions label {
@@ -318,10 +290,12 @@
 .rr-canvas {
   padding: 16px 12px 18px;
 }
-.rr-fig {
-  justify-content: space-between;
-  font-size: 9px;
-  padding: 0 3px;
+.rr-view-mode {
+  font: 9px/1.45 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  color: var(--muted);
+  text-align: right;
 }
 .rr-diagram {
   min-width: 0;
@@ -419,19 +393,10 @@
   border-top: 1px solid var(--line);
   padding: 16px 18px 18px;
 }
-.rr-step-row {
-  justify-content: space-between;
-  gap: 14px;
-}
-.rr-step-row > span {
-  font-size: 9px;
-  white-space: nowrap;
-}
 .rr-segments {
   display: flex;
   gap: 4px;
   flex: 1;
-  max-width: 250px;
 }
 .rr-segments button {
   flex: 1;
@@ -474,14 +439,13 @@
   padding: clamp(16px, 1.5vw, 26px);
   background: var(--panel);
 }
-.rr-rule {
-  width: 18px;
-  border-top: 1px solid currentColor;
-}
 .rr-notes h2,
 .rr-quiz h2 {
   font-size: clamp(24px, 2vw, 34px);
   margin: 12px 0;
+}
+.rr-step-copy h2 {
+  margin-top: 0;
 }
 .rr-notes p,
 .rr-quiz p,
@@ -577,16 +541,6 @@
   padding: 8px 12px;
   text-align: left;
   font-size: 14px;
-}
-.rr-answers button span {
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  width: 23px;
-  height: 23px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  font: 11px var(--mono);
 }
 .rr-answers button[aria-pressed='true'] {
   border-color: var(--accent);

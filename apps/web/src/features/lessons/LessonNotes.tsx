@@ -39,10 +39,6 @@ export function LessonNotes({ lesson, index }: { lesson: Lesson; index: number }
   return (
     <aside className="rr-notes" aria-label="Step explanation">
       <div className="rr-step-copy" aria-live="polite" aria-atomic="true">
-        <div className="rr-eyebrow">
-          <span className="rr-rule" />
-          Step {String(index + 1).padStart(2, '0')}
-        </div>
         <h2>{step.title}</h2>
         <p>{markKeywords(step.body, step)}</p>
       </div>
@@ -104,7 +100,6 @@ export function KnowledgeCheck({
       <div className="rr-answers">
         {lesson.quiz.options.map((option, i) => (
           <button key={option} aria-pressed={answer === i} onClick={() => setAnswer(i)}>
-            <span>{String.fromCharCode(65 + i)}</span>
             {option}
             {correct && i === answer && <Check size={16} />}
           </button>

@@ -148,7 +148,7 @@ export default function Curriculum() {
                     </span>
                     <span className="catalog-heading">
                       <small>
-                        {t.difficulty} · {all.length} lessons
+                        {t.difficulty}, {all.length} lessons
                       </small>
                       <strong>{t.title}</strong>
                       <span>{t.description}</span>
@@ -171,15 +171,9 @@ export default function Curriculum() {
                       return (
                         <li key={l.slug}>
                           <Link to={'/lessons/' + l.slug}>
-                            <span className="lesson-number">
-                              {record?.completed ? (
-                                <Check size={15} />
-                              ) : (
-                                String(all.indexOf(l) + 1).padStart(2, '0')
-                              )}
-                            </span>
                             <span>{l.title}</span>
                             <small>
+                              {record?.completed && <Check size={15} aria-hidden="true" />}
                               {record?.completed
                                 ? 'Complete'
                                 : record

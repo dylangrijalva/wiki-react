@@ -116,15 +116,6 @@ function Studio({
         <Link to="/curriculum">Curriculum</Link>
         <ChevronRight size={13} />
         <Link to={'/curriculum?track=' + lesson.trackId}>{track?.title}</Link>
-        <ChevronRight size={13} />
-        <span>
-          Lesson{' '}
-          {String(
-            lessons
-              .filter((l) => l.trackId === lesson.trackId)
-              .findIndex((l) => l.slug === lesson.slug) + 1,
-          ).padStart(2, '0')}
-        </span>
       </div>
       <div className={'rr-workspace ' + (open ? 'is-open' : '')}>
         <div className="rr-nav-slot">
@@ -151,9 +142,8 @@ function Studio({
         <div className="rr-lesson-body">
           <div className="rr-title-row">
             <div className="rr-track-meta">
-              <span />
-              {track?.title}
-              <i /> {track?.difficulty}
+              <span>{track?.title}</span>
+              <span>{track?.difficulty}</span>
             </div>
             <button
               className="rr-bookmark"

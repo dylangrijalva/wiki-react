@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Search, CornerDownLeft, X, BookOpen } from 'lucide-react'
+import { Search, CornerDownLeft, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLessons, useSearch } from '../../lib/api'
 
@@ -85,7 +85,6 @@ export default function Palette({ close }: { close: () => void }) {
               onFocus={() => setActive(i)}
               onClick={() => go(r.slug)}
             >
-              <BookOpen size={16} />
               <span>{r.title}</span>
               <CornerDownLeft size={14} />
             </button>
@@ -100,7 +99,11 @@ export default function Palette({ close }: { close: () => void }) {
                 : 'No lessons found. Try a shorter search.'}
           </p>
         )}
-        <div className="palette-foot mono">↑ ↓ to browse · Enter to open · Esc to close</div>
+        <div className="palette-foot mono">
+          <span>↑ ↓ to browse</span>
+          <span>Enter to open</span>
+          <span>Esc to close</span>
+        </div>
       </div>
     </dialog>
   )

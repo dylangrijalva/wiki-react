@@ -43,12 +43,7 @@ export default function RenderFigure() {
   }
   return (
     <figure className="render-figure">
-      <div className="figure-bar">
-        <span>
-          <i className="live-dot" /> COMPONENT TREE
-        </span>
-        <span>FIG. 01</span>
-      </div>
+      <div className="figure-bar">COMPONENT TREE</div>
       <div className="figure-field">
         <svg
           ref={canvas}

@@ -137,14 +137,10 @@
 .active-track:hover {
   background: var(--soft);
 }
-.lesson-number {
-  display: grid;
-  place-items: center;
-  background: var(--soft);
-  width: 29px;
-  height: 25px;
-  border-radius: 4px;
-  font: 11px var(--mono);
+.catalog-track li small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .catalog-track li small,
 .active-track span {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Check, ChevronDown, Search, Circle, CircleDot } from 'lucide-react'
+import { Check, ChevronDown, Search, Clock3 } from 'lucide-react'
 import type { Lesson, LessonSummary, Progress, Track } from '@rendered/shared'
 
 export function LessonNavigation({
@@ -35,7 +35,7 @@ export function LessonNavigation({
           onChange={(e) => setSearch(e.target.value)}
         />
       </label>
-      {tracks.map((track, i) => {
+      {tracks.map((track) => {
         const children = filtered.filter((item) => item.trackId === track.id)
         if (!children.length) return null
         const open = Boolean(query) || expanded.includes(track.id)
@@ -49,9 +49,6 @@ export function LessonNavigation({
                 )
               }
             >
-              <span className="rr-track-number" style={{ background: track.color }}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
               {track.title}
               <ChevronDown size={14} style={{ rotate: open ? '180deg' : '0deg' }} />
             </button>
@@ -60,7 +57,6 @@ export function LessonNavigation({
                 {children.map((item) => {
                   const row = progress.find((p) => p.lessonId === item.slug)
                   const active = lesson.slug === item.slug
-                  const Icon = row?.completed ? Check : active || row ? CircleDot : Circle
                   return (
                     <li key={item.slug}>
                       <Link
@@ -68,9 +64,19 @@ export function LessonNavigation({
                         aria-current={active ? 'page' : undefined}
                         onClick={onNavigate}
                       >
-                        <Icon size={13} />
                         {item.title}
-                        {row?.completed && <span className="rr-sr">, completed</span>}
+                        {row && (
+                          <>
+                            {row.completed ? (
+                              <Check size={13} aria-hidden="true" />
+                            ) : (
+                              <Clock3 size={13} aria-hidden="true" />
+                            )}
+                            <span className="rr-sr">
+                              {row.completed ? ', completed' : ', in progress'}
+                            </span>
+                          </>
+                        )}
                       </Link>
                     </li>
                   )
