@@ -8,6 +8,7 @@ const baseURL = 'http://127.0.0.1:' + webPort
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  forbidOnly: !!process.env.CI,
   workers: 3,
   use: {
     baseURL,
