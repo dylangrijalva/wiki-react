@@ -91,7 +91,10 @@ export default function Shell() {
             <NavLinks />
           </nav>
           <div className="utilities">
-            <Link className="account-nav" to={accountPath}>
+            <Link
+              className={session.data?.user ? 'account-nav' : 'account-nav btn primary'}
+              to={accountPath}
+            >
               {accountText}
             </Link>
             <button className="search-launch" onClick={open} aria-label="Search lessons">
@@ -121,7 +124,11 @@ export default function Shell() {
         {menu && (
           <nav className="mobile-nav" aria-label="Mobile">
             <NavLinks close={() => setMenu(false)} />
-            <Link to={accountPath} onClick={() => setMenu(false)}>
+            <Link
+              className={session.data?.user ? undefined : 'btn primary'}
+              to={accountPath}
+              onClick={() => setMenu(false)}
+            >
               {accountText}
             </Link>
           </nav>

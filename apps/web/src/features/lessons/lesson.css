@@ -427,13 +427,17 @@
   font-size: 12px;
   font-weight: 600;
 }
-.rr-step-actions button:hover:not(:disabled) {
+.rr-step-actions button:hover:not(:disabled, .rr-next) {
   border-color: var(--ink);
 }
 .rr-step-actions .rr-next {
   color: var(--paper);
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.rr-step-actions .rr-next:hover:not(:disabled) {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
 }
 .rr-notes {
   padding: clamp(16px, 1.5vw, 26px);

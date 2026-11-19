@@ -170,6 +170,7 @@
   }
 }
 .account-nav {
+  min-height: 36px;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -177,7 +178,7 @@
   border: 1px solid var(--line);
   border-radius: 7px;
 }
-.account-nav:hover {
+.account-nav:not(.primary):hover {
   border-color: var(--ink);
   color: var(--accent);
 }

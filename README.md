@@ -4,7 +4,7 @@
 <p align="center"><strong>React concepts, beautifully explained.</strong><br>Step inside a render, follow a state update, and watch the DOM change.</p>
 <p align="center">I made this guide with love for anyone learning React.</p>
 <p align="center"><img src="docs/stack.svg" alt="React · TypeScript · Motion · Hono · SQLite" width="440"></p>
-<p align="center"><a href="#run-it-locally">Quick start</a> · <a href="#inside-the-course">Curriculum</a> · <a href="docs/operations.md">API and deployment</a> · <a href="docs/contributing.md">Contribute</a></p>
+<p align="center"><a href="https://react-rendered.onrender.com">Open the live app</a> · <a href="#run-it-locally">Quick start</a> · <a href="#inside-the-course">Curriculum</a> · <a href="docs/operations.md">API and deployment</a> · <a href="docs/contributing.md">Contribute</a></p>
 
 ## Run it locally
 

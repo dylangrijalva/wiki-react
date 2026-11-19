@@ -31,6 +31,7 @@
   --line: #cdcec5;
   --purple: #7752ba;
   --accent: #7952bc;
+  --action-hover: color-mix(in srgb, var(--accent) 84%, var(--ink));
   --soft: #f0eee7;
   --sans: var(--font-sans);
   --mono: var(--font-mono);
@@ -151,17 +152,19 @@ kbd {
     background 0.16s,
     color 0.16s;
 }
-.btn:hover {
+.btn:hover:not(:disabled, .primary) {
   background: var(--soft);
 }
 .btn.primary {
-  background: var(--ink);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--paper);
   box-shadow: 0 2px 0 #0002;
 }
-.btn.primary:hover {
-  background: var(--purple);
-  color: var(--panel);
+.btn.primary:hover:not(:disabled) {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+  color: var(--paper);
 }
 .text-link {
   display: inline-flex;
