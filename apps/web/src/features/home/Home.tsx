@@ -32,7 +32,7 @@ const guideSteps = [
     Icon: Bookmark,
     title: 'Pick up where you left off',
     description:
-      'Come back in the same browser and your lesson opens at the last step you viewed. You can bookmark a lesson, too.',
+      'Each lesson remembers your last step. Create an account to use your bookmarks and progress on another device.',
   },
 ]
 export default function Home() {

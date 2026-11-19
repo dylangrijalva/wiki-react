@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Bookmark, Compass, Check } from 'lucide-react'
 import type { LessonSummary } from '@rendered/shared'
 import { useBookmarks, useProgress, useLessons, useTracks } from '../../lib/api'
+import { useSession } from '../../lib/session'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
 function ReadingList({
   title,
@@ -33,6 +34,7 @@ function ReadingList({
   )
 }
 export default function ProgressPage() {
+  const signedIn = Boolean(useSession().data?.user)
   const catalog = useLessons(),
     tracks = useTracks(),
     visits = useProgress(),
@@ -68,7 +70,19 @@ export default function ProgressPage() {
         <h1 className="display-heading">
           My progress<span>.</span>
         </h1>
-        <p>Reopen a lesson in this browser to return to the step where you left off.</p>
+        <p>
+          {signedIn ? (
+            'Reopen a lesson to return to the step where you left off.'
+          ) : (
+            <>
+              Your progress is saved for this browser.{' '}
+              <Link className="account-link" to="/register">
+                Create an account
+              </Link>{' '}
+              to continue on another device.
+            </>
+          )}
+        </p>
       </div>
       <div className="progress-cards">
         <article>

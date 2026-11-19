@@ -21,6 +21,8 @@ pnpm dev
 
 Press **Ctrl+C** in the terminal to stop both servers. Run `pnpm dev` again to pick up where you left off.
 
+You can work through the course as a guest. Choose **Sign in** and then create an account with your email and password to keep the progress and bookmarks you already have in this browser. Sign in with the same account on another device to pick up where you left off.
+
 ![The lesson player showing the Player component, its title and play counter, and the code that connects them.](screenshots/lesson.png)
 
 ## What changes when you click?
@@ -54,7 +56,7 @@ The course follows examples from an audio editor. Switch stations to watch an ef
 | Visual walkthrough   | Use **←** and **→** to step through a diagram. Compare the highlighted nodes with the code. Replay a transition or pause motion.                                               |
 | Hands-on experiments | Change list keys, solo a channel, switch effect dependencies, compose children, toggle memoization, or resolve a request. The performance experiment counts simulated renders. |
 | Curriculum explorer  | Filter by subject, difficulty, or progress. Press **⌘K** or **Ctrl+K** to search by concept, then use the arrows and Enter to open a lesson.                                   |
-| Field notes          | Save a bookmark, finish a knowledge check, or leave a lesson midway. Your guest dashboard shows where to resume on this browser.                                               |
+| Field notes          | Save a bookmark, finish a knowledge check, or leave a lesson midway. Open **My progress** to resume. Sign in to see the same records on another device.                        |
 
 ## Architecture
 
@@ -64,15 +66,15 @@ flowchart LR
   Web --> Player[Lesson player]
   Player --> Scene[SVG scenes and Motion]
   Web --> Query[TanStack Query]
-  Query -->|JSON and guest cookie| API[Hono on Node.js]
+  Query -->|JSON and session cookies| API[Hono on Node.js]
   API -->|validated updates| ORM[Drizzle]
   ORM --> DB[(SQLite)]
   Content[Typed curriculum] -->|seed at startup| DB
 ```
 
-React and strict TypeScript drive the interface. Tailwind CSS v4, semantic color tokens, local font files, and Lucide icons are shared across the four screens. React state handles individual controls. TanStack Query caches course data, reads the guest record, and serializes progress writes.
+React and strict TypeScript drive the interface. Tailwind CSS v4, semantic color tokens, local font files, and Lucide icons are shared across the site. React state handles individual controls. TanStack Query caches course data, reads learner records, and serializes progress writes.
 
-The Hono API validates incoming updates with Zod. Drizzle records the resume step, the set of visited steps, completion, and bookmarks. A guest cookie identifies the learner. SQLite stores a digest of the token. Reopening the browser restores progress while that cookie is present.
+The Hono API validates incoming updates with Zod. Drizzle records the resume step, visited steps, completion, and bookmarks. SQLite holds salted password hashes and the digests of session tokens. The browser sends the token in an HttpOnly cookie. Signing out ends that browser’s account session.
 
 ### How the diagrams work
 
@@ -85,14 +87,14 @@ apps/
   web/src/
     app/                    Navigation, routing shell, theme controls
     components/             Brand and original isometric artwork
-    features/               Homepage, curriculum, player, search, and progress
+    features/               Homepage, curriculum, player, search, progress, and accounts
       visualizations/       Scene layout, diagrams, and six experiments
-    lib/api.ts              Query hooks and guest mutations
+    lib/api.ts              Query hooks and learner updates
     styles/                 Fonts, tokens, and shared styles
   api/
     drizzle/                Versioned SQL migrations
     src/db/                 Schema, migration runner, and curriculum seed
-    src/routes/             Catalog, search, guest sessions, and learner records
+    src/routes/             Catalog, search, sign-in, sessions, and learner records
 packages/shared/src/        TypeScript contracts and authored lesson content
 tests/                      Playwright learning flows and isolated test server
 docs/                       Artwork, server operations, and contributor guide
@@ -118,11 +120,13 @@ screenshots/                Captures from the running application
 | `PORT` / `HOST`                 | `3001` / `127.0.0.1`            | API listener                                                                      |
 | `WEB_PORT`                      | `5177`                          | Vite development listener                                                         |
 | `API_ORIGIN`                    | `http://127.0.0.1:3001`         | API upstream for the Vite proxy                                                   |
+| `PUBLIC_ORIGIN`                 | Request host                    | Public origin used to check browser writes when a proxy rewrites the Host header. |
+| `TRUSTED_PROXY_IP`              | Unset                           | Direct reverse proxy’s IP, for per-client sign-in and registration limits.        |
 | `NODE_ENV`                      | Unset                           | Use `production` behind HTTPS to require the web build and enable Secure cookies. |
 | `PLAYWRIGHT_CHANNEL`            | Bundled Chromium                | Set to `chrome` to test with installed Google Chrome.                             |
 | `E2E_API_PORT` / `E2E_WEB_PORT` | `4319` / `4320`                 | Dedicated test listeners                                                          |
 
-Deploy the built app as one Node service behind HTTPS with a persistent SQLite volume. The operations guide covers startup, backup, guest cookies, and request examples. [Deployment and API reference](docs/operations.md)
+Deploy the built app as one Node service behind HTTPS with a persistent SQLite volume. The operations guide covers startup, backup, cookies, and the account API. [Deployment and API reference](docs/operations.md)
 
 ### Testing
 
@@ -132,7 +136,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-The API suite creates temporary databases and checks migrations, guest isolation, concurrent updates, and persistence after reopening. Component tests cover filters, quizzes, and experiments. Playwright visits every lesson, compares the SVG at adjacent steps, finishes a knowledge check, and reloads a saved guest session. It checks the four screens at phone, tablet, and desktop sizes.
+The API suite creates temporary databases to check migrations, account and guest isolation, concurrent updates, and persistence after reopening. Component tests cover filters, quizzes, and experiments. Playwright visits every lesson, finishes a knowledge check, registers a guest, and signs in from a second browser to check that bookmarks follow the account.
 
 ## Roadmap
 

@@ -21,6 +21,8 @@ if (production && !existsSync(paths.web + 'index.html')) {
 const store = await openDatabase(process.env.DATABASE_PATH ?? paths.database, tracks, lessons)
 const app = createApp(store.db, {
   secure: production,
+  publicOrigin: process.env.PUBLIC_ORIGIN,
+  trustedProxyIp: process.env.TRUSTED_PROXY_IP,
   webRoot: existsSync(paths.web) ? paths.web : undefined,
 })
 const server = serve(

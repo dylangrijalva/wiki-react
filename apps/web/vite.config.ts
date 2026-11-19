@@ -6,7 +6,9 @@ export default defineConfig({
   server: {
     port: Number(process.env.WEB_PORT ?? 5177),
     strictPort: true,
-    proxy: { '/api': process.env.API_ORIGIN ?? 'http://127.0.0.1:3001' },
+    proxy: {
+      '/api': { target: process.env.API_ORIGIN ?? 'http://127.0.0.1:3001', changeOrigin: false },
+    },
   },
   test: { environment: 'jsdom' },
 })

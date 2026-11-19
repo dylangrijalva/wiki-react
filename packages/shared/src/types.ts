@@ -50,3 +50,6 @@ export interface Progress {
   visitedSteps: number[]
   updatedAt: string
 }
+export interface AuthSession {
+  user: { email: string } | null
+}

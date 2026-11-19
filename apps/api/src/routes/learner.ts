@@ -6,7 +6,7 @@ import type { Progress } from '@rendered/shared'
 import type { Database } from '../db/database'
 import { bookmarks, lessonTable, progress } from '../db/schema'
 import { ApiError, lessonNotFound, parseSlug } from './errors'
-import { guestSession } from './guest'
+import { learnerSessions } from '../auth/sessions'
 
 const progressInput = z.strictObject({
   step: z.number().int().nonnegative(),
@@ -22,7 +22,7 @@ const progressFields = {
 
 export function learnerRoutes(db: Database, secure: boolean) {
   const app = new Hono()
-  const guest = guestSession(db, secure)
+  const sessions = learnerSessions(db, secure)
   async function stepCount(id: string) {
     const row = await db
       .select({ count: lessonTable.stepCount })
@@ -38,12 +38,12 @@ export function learnerRoutes(db: Database, secure: boolean) {
     await next()
   })
   app.get('/progress', async (c) => {
-    const id = await guest.initialize(c)
+    const id = await sessions.owner(c, true)
     const rows: Progress[] = await db
       .select(progressFields)
       .from(progress)
       .innerJoin(lessonTable, eq(progress.lessonId, lessonTable.slug))
-      .where(and(eq(progress.guestId, id), gte(lessonTable.position, 0)))
+      .where(and(eq(progress.learnerId, id), gte(lessonTable.position, 0)))
       .orderBy(desc(progress.updatedAt))
     return c.json(rows)
   })
@@ -57,7 +57,7 @@ export function learnerRoutes(db: Database, secure: boolean) {
       },
     }),
     async (c) => {
-      const id = await guest.require(c)
+      const id = await sessions.owner(c, false)
       const slug = parseSlug(c.req.param('slug'))
       const count = await stepCount(slug)
       const parsed = progressInput.safeParse(await c.req.json<unknown>().catch(() => null))
@@ -73,9 +73,9 @@ export function learnerRoutes(db: Database, secure: boolean) {
       // Merge at write time so concurrent requests retain every visit and a completed lesson stays complete.
       const result = await db
         .insert(progress)
-        .values({ guestId: id, lessonId: slug, step, completed, visitedSteps: [step], updatedAt })
+        .values({ learnerId: id, lessonId: slug, step, completed, visitedSteps: [step], updatedAt })
         .onConflictDoUpdate({
-          target: [progress.guestId, progress.lessonId],
+          target: [progress.learnerId, progress.lessonId],
           set: {
             step,
             updatedAt,
@@ -90,24 +90,26 @@ export function learnerRoutes(db: Database, secure: boolean) {
   )
 
   app.get('/bookmarks', async (c) => {
-    const id = await guest.require(c)
+    const id = await sessions.owner(c, false)
     const rows = await db
       .select({ lessonId: bookmarks.lessonId })
       .from(bookmarks)
       .innerJoin(lessonTable, eq(lessonTable.slug, bookmarks.lessonId))
-      .where(and(eq(bookmarks.guestId, id), gte(lessonTable.position, 0)))
+      .where(and(eq(bookmarks.learnerId, id), gte(lessonTable.position, 0)))
       .orderBy(lessonTable.position)
     return c.json(rows.map((row) => row.lessonId))
   })
   app.on(['POST', 'DELETE'], '/bookmarks/:slug', async (c) => {
-    const id = await guest.require(c)
+    const id = await sessions.owner(c, false)
     const slug = parseSlug(c.req.param('slug'))
     await stepCount(slug)
     const bookmarked = c.req.method === 'POST'
     if (bookmarked) {
-      await db.insert(bookmarks).values({ guestId: id, lessonId: slug }).onConflictDoNothing()
+      await db.insert(bookmarks).values({ learnerId: id, lessonId: slug }).onConflictDoNothing()
     } else {
-      await db.delete(bookmarks).where(and(eq(bookmarks.guestId, id), eq(bookmarks.lessonId, slug)))
+      await db
+        .delete(bookmarks)
+        .where(and(eq(bookmarks.learnerId, id), eq(bookmarks.lessonId, slug)))
     }
     return c.json({ lessonId: slug, bookmarked })
   })

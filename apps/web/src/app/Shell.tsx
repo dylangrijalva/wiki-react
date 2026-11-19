@@ -4,6 +4,7 @@ import { Search, Moon, Sun, Menu, X, Command } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Brand } from '../components/Brand'
 import Palette from '../features/search/Palette'
+import { useSession } from '../lib/session'
 
 const pages = [
   ['/', 'Overview'],
@@ -22,6 +23,9 @@ export default function Shell() {
     [menu, setMenu] = useState(false),
     [dark, setDark] = useState(document.documentElement.dataset.theme === 'dark')
   const { pathname } = useLocation()
+  const session = useSession()
+  const accountPath = session.data?.user ? '/account' : '/login'
+  const accountText = session.data?.user ? 'Account' : 'Sign in'
   const previous = useRef<HTMLElement | null>(null)
   const lastPath = useRef(pathname)
   const open = useCallback(() => {
@@ -48,7 +52,13 @@ export default function Shell() {
   useEffect(() => {
     window.scrollTo(0, 0)
     if (!pathname.startsWith('/lessons/')) {
-      const page = pages.find(([to]) => to === pathname)?.[1] ?? 'Page not found'
+      const accountTitles: Record<string, string> = {
+        '/account': 'Your account',
+        '/login': 'Sign in',
+        '/register': 'Create an account',
+      }
+      const page =
+        pages.find(([to]) => to === pathname)?.[1] ?? accountTitles[pathname] ?? 'Page not found'
       document.title =
         pathname === '/'
           ? 'React, Rendered · An interactive field guide'
@@ -81,6 +91,9 @@ export default function Shell() {
             <NavLinks />
           </nav>
           <div className="utilities">
+            <Link className="account-nav" to={accountPath}>
+              {accountText}
+            </Link>
             <button className="search-launch" onClick={open} aria-label="Search lessons">
               <Search size={15} />
               <span>Search lessons</span>
@@ -108,6 +121,9 @@ export default function Shell() {
         {menu && (
           <nav className="mobile-nav" aria-label="Mobile">
             <NavLinks close={() => setMenu(false)} />
+            <Link to={accountPath} onClick={() => setMenu(false)}>
+              {accountText}
+            </Link>
           </nav>
         )}
       </header>
@@ -119,7 +135,18 @@ export default function Shell() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <Outlet />
+        {pathname === '/' || pathname === '/curriculum' || session.isSuccess ? (
+          <Outlet />
+        ) : session.isError ? (
+          <div role="alert" className="wrap notice">
+            We couldn’t check your session.{' '}
+            <button className="text-link" onClick={() => void session.refetch()}>
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div className="wrap skeleton" role="status" aria-label="Checking your session" />
+        )}
       </motion.main>
       <footer className="site-footer">
         <div className="wrap footer-inner">

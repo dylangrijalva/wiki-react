@@ -1,15 +1,7 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Lesson, LessonSummary, Progress, Track } from '@rendered/shared'
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch('/api/' + path, { credentials: 'same-origin', ...init })
-  if (!response.ok)
-    throw new Error(
-      response.status === 404
-        ? 'We couldn’t find that lesson.'
-        : 'The server couldn’t complete the request.',
-    )
-  return response.json() as Promise<T>
-}
+import { request, useSession } from './session'
+
 export const useTracks = () =>
   useQuery({ queryKey: ['tracks'], queryFn: () => request<Track[]>('tracks'), staleTime: Infinity })
 export const useLessons = () =>
@@ -31,23 +23,43 @@ export const useSearch = (q: string) =>
     enabled: !!q.trim(),
     staleTime: 60000,
   })
-const progressOptions = queryOptions({
-  queryKey: ['progress'],
-  queryFn: () => request<Progress[]>('progress'),
-  staleTime: 30000,
-})
-export const useProgress = () => useQuery(progressOptions)
+
+function privateRequest<T>(email: string, path: string, init?: RequestInit) {
+  const headers = new Headers(init?.headers)
+  headers.set('X-Expected-Account', encodeURIComponent(email))
+  return request<T>(path, { ...init, cache: 'no-store', headers })
+}
+
+function progressOptions(email: string) {
+  return queryOptions({
+    queryKey: ['progress', email],
+    queryFn: ({ signal }) => privateRequest<Progress[]>(email, 'progress', { signal }),
+    staleTime: 30000,
+  })
+}
+
+export function useProgress() {
+  const session = useSession()
+  return useQuery({
+    ...progressOptions(session.data?.user?.email ?? ''),
+    enabled: session.isSuccess,
+  })
+}
 export function useBookmarks() {
+  const session = useSession(),
+    email = session.data?.user?.email ?? ''
   const progress = useProgress()
   return useQuery({
-    queryKey: ['bookmarks'],
-    queryFn: () => request<string[]>('bookmarks'),
-    enabled: progress.isSuccess,
+    queryKey: ['bookmarks', email],
+    queryFn: ({ signal }) => privateRequest<string[]>(email, 'bookmarks', { signal }),
+    enabled: session.isSuccess && progress.isSuccess,
   })
 }
 export function useSaveProgress() {
-  const client = useQueryClient()
+  const client = useQueryClient(),
+    email = useSession().data?.user?.email ?? ''
   return useMutation({
+    mutationKey: ['learner', 'progress'],
     scope: { id: 'progress-writes' },
     mutationFn: async ({
       slug,
@@ -58,31 +70,32 @@ export function useSaveProgress() {
       step: number
       completed?: boolean
     }) => {
-      await client.ensureQueryData(progressOptions)
-      return request<Progress>('progress/' + encodeURIComponent(slug), {
+      await client.ensureQueryData(progressOptions(email))
+      return privateRequest<Progress>(email, 'progress/' + encodeURIComponent(slug), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step, completed }),
       })
     },
     onSuccess: (row) =>
-      client.setQueryData<Progress[]>(['progress'], (old) => [
+      client.setQueryData<Progress[]>(['progress', email], (old) => [
         row,
         ...(old ?? []).filter((p) => p.lessonId !== row.lessonId),
       ]),
   })
 }
 export function useBookmark() {
-  const client = useQueryClient()
+  const client = useQueryClient(),
+    email = useSession().data?.user?.email ?? ''
   return useMutation({
+    mutationKey: ['learner', 'bookmark'],
     scope: { id: 'bookmark-writes' },
     mutationFn: async ({ slug, bookmarked }: { slug: string; bookmarked: boolean }) => {
-      await client.ensureQueryData(progressOptions)
-      await request('bookmarks/' + encodeURIComponent(slug), {
+      await client.ensureQueryData(progressOptions(email))
+      await privateRequest(email, 'bookmarks/' + encodeURIComponent(slug), {
         method: bookmarked ? 'POST' : 'DELETE',
       })
-      return { slug, bookmarked }
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ['bookmarks'] }),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['bookmarks', email] }),
   })
 }

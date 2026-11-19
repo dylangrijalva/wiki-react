@@ -4,13 +4,22 @@ import { Hono } from 'hono'
 import type { Database } from './db/database'
 import { catalogRoutes } from './routes/catalog'
 import { ApiError } from './routes/errors'
+import { authRoutes } from './routes/auth'
+import { sameOriginWrites } from './auth/origin'
 import { learnerRoutes } from './routes/learner'
 
 export function createApp(
   db: Database,
-  { secure = false, webRoot }: { secure?: boolean; webRoot?: string } = {},
+  {
+    secure = false,
+    webRoot,
+    publicOrigin,
+    trustedProxyIp,
+  }: { secure?: boolean; webRoot?: string; publicOrigin?: string; trustedProxyIp?: string } = {},
 ) {
   const app = new Hono()
+  app.use('/api/*', sameOriginWrites(secure, publicOrigin))
+  app.route('/api/auth', authRoutes(db, secure, trustedProxyIp))
   app.get('/api/health', async (c) => {
     await db.get(sql`SELECT 1`)
     return c.json({ status: 'ok' })

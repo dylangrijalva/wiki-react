@@ -4,6 +4,7 @@ import { Search, ChevronDown, ArrowRight, Check, BookOpen, SlidersHorizontal } f
 import { motion } from 'motion/react'
 import type { LessonSummary, Progress } from '@rendered/shared'
 import { useTracks, useProgress, useLessons } from '../../lib/api'
+import { useSession } from '../../lib/session'
 import { TrackArt, trackPaper } from '../../components/Illustrations'
 import './catalog.css'
 
@@ -34,6 +35,9 @@ export default function Curriculum() {
   const topics = useTracks(),
     catalog = useLessons(),
     progress = useProgress()
+  const session = useSession()
+  const records = session.isSuccess && progress.isSuccess ? progress.data : undefined
+  const completionFilter = records ? status : 'all'
   const reset = () => {
     setParams({})
     setQuery('')
@@ -53,13 +57,13 @@ export default function Curriculum() {
           matchesLesson(
             l,
             query,
-            status,
-            progress.data?.find((r) => r.lessonId === l.slug),
+            completionFilter,
+            records?.find((r) => r.lessonId === l.slug),
           ),
       ),
     }))
     .filter((t) => t.rows.length)
-  const queries = [topics, catalog, progress]
+  const queries = [topics, catalog]
   return (
     <div className="wrap catalog-page">
       <div className="page-title">
@@ -108,7 +112,8 @@ export default function Curriculum() {
         </select>
         <select
           aria-label="Completion status"
-          value={status}
+          value={completionFilter}
+          disabled={!records}
           onChange={(e) => setStatus(e.target.value)}
         >
           <option value="all">Any status</option>
@@ -117,6 +122,17 @@ export default function Curriculum() {
           <option value="complete">Completed</option>
         </select>
       </div>
+      {(session.isError || progress.isError) && (
+        <p className="notice" role="status">
+          Your saved progress couldn’t load.{' '}
+          <button
+            className="text-link"
+            onClick={() => void (session.isError ? session.refetch() : progress.refetch())}
+          >
+            Try again
+          </button>
+        </p>
+      )}
       {queries.some((q) => q.isError) ? (
         <div className="notice">
           We couldn’t load the curriculum.{' '}
@@ -129,7 +145,7 @@ export default function Curriculum() {
           {filtered.map(({ t, rows }) => {
             const all = catalog.data!.filter((l) => l.trackId === t.id),
               done = all.filter((l) =>
-                progress.data?.some((r) => r.lessonId === l.slug && r.completed),
+                records?.some((r) => r.lessonId === l.slug && r.completed),
               ).length
             const opened =
               expanded[t.id] ??
@@ -153,10 +169,12 @@ export default function Curriculum() {
                       <strong>{t.title}</strong>
                       <span>{t.description}</span>
                     </span>
-                    <span className="completion">
-                      {done}/{all.length} complete
-                      <progress value={done} max={all.length} />
-                    </span>
+                    {records && (
+                      <span className="completion">
+                        {done}/{all.length} complete
+                        <progress value={done} max={all.length} />
+                      </span>
+                    )}
                     <ChevronDown size={19} className={opened ? 'up' : ''} />
                   </button>
                 </h2>
@@ -167,7 +185,7 @@ export default function Curriculum() {
                     animate={{ opacity: 1, y: 0 }}
                   >
                     {rows.map((l) => {
-                      const record = progress.data?.find((r) => r.lessonId === l.slug)
+                      const record = records?.find((r) => r.lessonId === l.slug)
                       return (
                         <li key={l.slug}>
                           <Link to={'/lessons/' + l.slug}>
