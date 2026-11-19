@@ -39,7 +39,13 @@ function Studio({
   const saved = progress.find((row) => row.lessonId === lesson.slug)
   const [index, setIndex] = useState(() => Math.min(saved?.step ?? 0, lesson.steps.length - 1))
   const [check, setCheck] = useState(false)
-  const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1100)
+  const [open, setOpen] = useState(() => window.matchMedia('(min-width: 1100px)').matches)
+  useEffect(() => {
+    const wideLayout = window.matchMedia('(min-width: 1100px)')
+    const fitOutline = (event: MediaQueryListEvent) => setOpen(event.matches)
+    wideLayout.addEventListener('change', fitOutline)
+    return () => wideLayout.removeEventListener('change', fitOutline)
+  }, [])
   const reduced = useReducedMotion()
   const {
     mutate: save,

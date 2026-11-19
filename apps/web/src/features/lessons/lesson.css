@@ -108,8 +108,9 @@
   scrollbar-width: thin;
 }
 .rr-nav-heading {
-  font-family: var(--serif);
-  font-size: 23px;
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 600;
   letter-spacing: -0.04em;
 }
 .rr-nav-search {
@@ -229,8 +230,9 @@
 .rr-notes h2,
 .rr-quiz h2,
 .rr-load h1 {
-  font: 450 clamp(42px, 4.25vw, 72px)/1.04 var(--serif);
-  letter-spacing: -0.052em;
+  font: 550 clamp(38px, 3.8vw, 64px)/1.08 var(--sans);
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
   margin: 14px 0 6px;
 }
 .rr-objective {
@@ -388,9 +390,7 @@
   text-transform: uppercase;
 }
 .rr-node-label {
-  font:
-    600 13px 'DM Sans',
-    sans-serif;
+  font: 600 13px var(--sans);
   fill: #312c34;
 }
 .rr-node-detail {
@@ -480,7 +480,7 @@
 }
 .rr-notes h2,
 .rr-quiz h2 {
-  font-size: clamp(28px, 2.45vw, 42px);
+  font-size: clamp(24px, 2vw, 34px);
   margin: 12px 0;
 }
 .rr-notes p,
@@ -771,7 +771,7 @@
     flex-wrap: wrap;
   }
   .rr-lesson-body > h1 {
-    font-size: clamp(38px, 8vw, 52px);
+    font-size: clamp(32px, 7.3vw, 46px);
   }
   .rr-workspace {
     padding-top: 15px;
@@ -815,6 +815,7 @@
     font-size: 10px;
   }
   .rr-stage-top {
+    flex-wrap: wrap;
     gap: 4px;
   }
   .rr-lesson-body > h1 {
@@ -826,9 +827,7 @@
   display: block;
 }
 .rr-clip-label {
-  font:
-    650 15px 'DM Sans',
-    sans-serif;
+  font: 650 15px var(--sans);
   fill: #343039;
 }
 .rr-clip-draft {
@@ -844,4 +843,58 @@
   fill: #322d35;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+@media (max-width: 790px) {
+  .rr-tools button {
+    width: 36px;
+    height: 36px;
+  }
+  .rr-nav-toggle,
+  .rr-bookmark,
+  .rr-stage-views button,
+  .rr-lab-actions button,
+  .rr-lab-actions select,
+  .rr-step-actions button,
+  .rr-note-detail summary {
+    min-height: 40px;
+  }
+  .rr-nav-search input {
+    font-size: 16px;
+  }
+  .rr-nav-track a {
+    align-items: center;
+    min-height: 40px;
+  }
+  .rr-reset {
+    min-height: 36px;
+  }
+}
+@media (max-width: 540px) {
+  .rr-diagram .rr-graph {
+    height: auto;
+    max-height: none;
+    max-width: 380px;
+    min-height: 0;
+    margin: 12px auto;
+  }
+  .rr-clip-tree {
+    max-height: 280px;
+  }
+  .rr-node-status,
+  .rr-clip-status {
+    font-size: 10px;
+  }
+  .rr-node-detail {
+    font-size: 10.5px;
+  }
+  .rr-code pre {
+    font-size: 12px;
+  }
+  .rr-lab-result {
+    font-size: 13px;
+  }
+  .rr-bookmark {
+    flex-shrink: 0;
+  }
 }

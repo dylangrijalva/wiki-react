@@ -45,7 +45,7 @@ export default function Home() {
             <span className="edition-mark" />
             AN INTERACTIVE FIELD GUIDE
           </div>
-          <h1 className="serif">
+          <h1 className="display-heading">
             React, under
             <br />
             <em>the hood.</em>
@@ -168,7 +168,7 @@ export default function Home() {
         </div>
       </section>
       <section className="how">
-        <h2 className="serif">How to use this guide</h2>
+        <h2 className="display-heading">How to use this guide</h2>
         <div>
           {guideSteps.map(({ Icon, title, description }) => (
             <article key={title}>

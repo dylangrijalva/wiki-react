@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { useCompactDiagram } from './useCompactDiagram'
 import { motion, useReducedMotion } from 'motion/react'
 
 const captions = [
@@ -70,13 +71,14 @@ export function RenderBench({
 }) {
   const rid = useId().replace(/:/g, '')
   const reduced = useReducedMotion()
+  const compact = useCompactDiagram()
   const count = index >= 3 ? 1 : 0
   const text = { fill: '#37313c', fontFamily: 'var(--mono)', fontSize: 11 }
   return (
     <div className="rr-diagram rr-bench" data-paused={paused || reduced}>
       <svg
         key={replay}
-        viewBox="0 0 550 324"
+        viewBox={compact ? '95 19 355 288' : '0 0 550 324'}
         role="img"
         aria-labelledby={rid + 'title'}
         aria-describedby={rid + 'desc'}
@@ -94,18 +96,32 @@ export function RenderBench({
             <path d="M0 0v5" stroke="#53505e" strokeWidth=".6" />
           </pattern>
         </defs>
-        <path d="m54 229 236-97 210 70-233 105Z" fill="#ccbde2" opacity=".19" />
+        <path
+          d={compact ? 'm108 229 172-85 153 65-172 89Z' : 'm54 229 236-97 210 70-233 105Z'}
+          fill="#ccbde2"
+          opacity=".19"
+        />
         <g fill="none" stroke="#676071" strokeWidth="1.8">
-          <path d="M273 119v19q0 7-9 10l-96 29q-10 4-10 13v14" />
+          <path
+            d={
+              compact
+                ? 'M273 119v19q0 7-9 10l-73 29q-10 4-10 13v14'
+                : 'M273 119v19q0 7-9 10l-96 29q-10 4-10 13v14'
+            }
+          />
           <path
             className={index === 1 || index === 2 ? 'rr-bench-wire' : ''}
-            d="M273 119v19q0 7 10 10l97 29q9 4 9 13v14"
+            d={
+              compact
+                ? 'M273 119v19q0 7 10 10l65 29q9 4 9 13v14'
+                : 'M273 119v19q0 7 10 10l97 29q9 4 9 13v14'
+            }
           />
         </g>
         <g fill="#b097d3" stroke="#42394a" strokeWidth="1.5">
           <circle cx="273" cy="137" r="4" />
-          <circle cx="158" cy="198" r="4" />
-          <circle cx="389" cy="198" r="4" />
+          <circle cx={compact ? 181 : 158} cy="198" r="4" />
+          <circle cx={compact ? 357 : 389} cy="198" r="4" />
         </g>
         <Card x={195} y={37} label="Player.tsx" tone="#c3a9e7" lit={index === 0}>
           <g fill="#a58cc7" stroke="#494052" strokeWidth="1.5">
@@ -119,14 +135,14 @@ export function RenderBench({
             strokeLinecap="round"
           />
         </Card>
-        <Card x={80} y={197} label="Title.tsx" tone="#eec5a6" lit={false}>
-          <text x="12" y="65" fontFamily="var(--serif)" fontSize="23" fill="#423137">
+        <Card x={compact ? 103 : 80} y={197} label="Title.tsx" tone="#eec5a6" lit={false}>
+          <text x="12" y="65" fontFamily="var(--sans)" fontSize="23" fill="#423137">
             Night drive
           </text>
           <path d="M12 76h71" stroke="#baa69d" strokeWidth="3" strokeLinecap="round" />
         </Card>
         <Card
-          x={311}
+          x={compact ? 279 : 311}
           y={197}
           label="PlayCount.tsx"
           tone={index === 4 ? '#a2d8bb' : '#add2e7'}
@@ -155,7 +171,7 @@ export function RenderBench({
           </motion.text>
         </Card>
         {index > 0 && (
-          <g transform="translate(367 124)">
+          <g transform={compact ? 'translate(294 120)' : 'translate(367 124)'}>
             <rect
               width="145"
               height="29"
@@ -169,15 +185,21 @@ export function RenderBench({
             </text>
           </g>
         )}
-        <g stroke="#89858a" fill="none">
-          <path d="M47 68h61l65 16m-49 223h74m238-209 18-19h44" strokeDasharray="2 4" />
-        </g>
-        <text x="48" y="60" className="rr-svg-note">
-          COMPONENT
-        </text>
-        <text x="447" y="73" className="rr-svg-note">
-          PROPS ↓
-        </text>
+        {!compact && (
+          <g stroke="#89858a" fill="none">
+            <path d="M47 68h61l65 16m-49 223h74m238-209 18-19h44" strokeDasharray="2 4" />
+          </g>
+        )}
+        {!compact && (
+          <text x="48" y="60" className="rr-svg-note">
+            COMPONENT
+          </text>
+        )}
+        {!compact && (
+          <text x="447" y="73" className="rr-svg-note">
+            PROPS ↓
+          </text>
+        )}
       </svg>
       <div className="rr-legend">
         <span>

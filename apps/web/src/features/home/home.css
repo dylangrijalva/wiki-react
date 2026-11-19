@@ -7,6 +7,7 @@
   border-bottom: 1px solid var(--line);
 }
 .hero-copy {
+  container-type: inline-size;
   min-width: 0;
 }
 .author-note {
@@ -15,7 +16,7 @@
   border-left: 3px solid var(--purple);
 }
 .author-note h2 {
-  font: 500 24px/1.2 var(--serif);
+  font: 500 24px/1.2 var(--sans);
 }
 .author-note p {
   max-width: 68ch;
@@ -36,15 +37,15 @@
   transform: rotate(-9deg);
 }
 .hero h1 {
-  font-size: clamp(78px, 7.6vw, 122px);
-  letter-spacing: -0.069em;
-  line-height: 0.89;
+  font-size: clamp(2rem, 18cqi, 7rem);
+  letter-spacing: -0.055em;
+  line-height: 0.96;
   margin: 30px 0 21px;
-  font-weight: 450;
+  font-weight: 560;
 }
 .hero h1 em {
   color: var(--purple);
-  font-weight: 400;
+  font-weight: inherit;
 }
 .hero-copy > p {
   font-size: clamp(15px, 1.2vw, 19px);
@@ -54,6 +55,7 @@
 }
 .hero-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 11px;
   margin: 25px 0;
 }
@@ -66,7 +68,8 @@
   font-size: 10px;
 }
 .course-facts span {
-  display: flex;
+  display: inline-flex;
+  white-space: nowrap;
   align-items: center;
   gap: 6px;
 }
@@ -229,7 +232,7 @@
   flex: 1;
 }
 .track-body h3 {
-  font: 500 27px/1.14 var(--serif);
+  font: 500 27px/1.14 var(--sans);
   letter-spacing: -0.045em;
 }
 .track-body p,
@@ -300,9 +303,6 @@
   .hero {
     gap: 25px;
   }
-  .hero h1 {
-    font-size: 80px;
-  }
   .course-facts {
     gap: 7px;
     font-size: 9px;
@@ -316,6 +316,9 @@
   .track-grid,
   .featured-grid {
     gap: 14px;
+  }
+  .track-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .track-body {
     padding: 16px;
@@ -331,7 +334,6 @@
     gap: 30px;
   }
   .hero h1 {
-    font-size: clamp(74px, 13vw, 100px);
     margin: 22px 0 17px;
   }
   .hero-actions {
@@ -347,10 +349,7 @@
     gap: 9px;
     font-size: 10px;
   }
-  .track-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .section-head {
+  .home .section-head {
     flex-wrap: wrap;
     margin-bottom: 18px;
   }
@@ -391,7 +390,7 @@
   .track-section .text-link {
     font-size: 12px;
   }
-  .section-head h2 {
+  .home .section-head h2 {
     font-size: 38px;
   }
   .track-body h3 {
@@ -399,9 +398,6 @@
   }
   .hero-actions .btn {
     padding: 11px 15px;
-  }
-  .hero h1 {
-    font-size: 80px;
   }
   .figure-bar {
     padding: 9px 13px;
@@ -417,10 +413,6 @@
   .hero-diagram {
     max-height: 315px;
   }
-  .hero h1 {
-    font-size: clamp(89px, 7.25vw, 112px);
-    word-spacing: 0.025em;
-  }
   .track-section {
     padding-top: 32px;
   }
@@ -428,13 +420,14 @@
     margin-bottom: 19px;
   }
 }
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: clamp(50px, 14.6vw, 68px);
-    line-height: 0.94;
-    letter-spacing: -0.055em;
+@media (max-width: 359px) {
+  .hero-actions .btn {
+    flex: 1 1 100%;
   }
-  .hero-actions {
-    flex-wrap: wrap;
+  .course-facts {
+    column-gap: 4px;
+  }
+  .course-facts span {
+    gap: 4px;
   }
 }

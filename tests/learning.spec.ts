@@ -171,7 +171,7 @@ test('compares memoized updates and cached background requests', async ({ page }
   ).toBeVisible()
 })
 
-for (const width of [390, 820, 1440]) {
+for (const width of [320, 390, 820, 1440]) {
   test(`the four experiences fit a ${width}px viewport and preserve the theme`, async ({
     page,
   }) => {
@@ -197,6 +197,53 @@ for (const width of [390, 820, 1440]) {
     }
   })
 }
+
+test('opens navigation and searches the curriculum on a 320px phone', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 })
+  await page.goto('/progress')
+  const header = page.getByRole('banner')
+  await header.getByRole('button', { name: 'Open navigation' }).click()
+  const menu = header.getByRole('navigation', { name: 'Mobile' })
+  await menu.getByRole('link', { name: 'Curriculum' }).click()
+  await expect(menu).not.toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('curriculum')
+  const subject = page.getByRole('combobox', { name: 'Subject' })
+  await subject.selectOption('production')
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Forms and validation/ }),
+  ).toBeVisible()
+
+  await header.getByRole('button', { name: 'Search lessons' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByRole('combobox').fill('lists-and-keys')
+  const result = dialog.getByRole('option')
+  await expect(result).toHaveCount(1)
+  const bounds = await dialog.boundingBox()
+  expect(bounds).not.toBeNull()
+  expect(bounds!.x).toBeGreaterThanOrEqual(0)
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+  await result.click()
+  await expect(page).toHaveURL(/\/lessons\/lists-and-keys$/)
+
+  const fonts = await page
+    .getByLabel('TypeScript example')
+    .locator('code')
+    .evaluate(async (code) => {
+      await document.fonts.ready
+      const firstFamily = (element: Element) =>
+        getComputedStyle(element).fontFamily.split(',')[0].trim().replace(/["']/g, '')
+      return {
+        heading: firstFamily(document.querySelector('main h1')!),
+        code: firstFamily(code),
+        loaded: [...document.fonts]
+          .filter((face) => face.status === 'loaded')
+          .map((face) => face.family.replace(/["']/g, '')),
+      }
+    })
+  expect(fonts.heading).toBe('Geist')
+  expect(fonts.code).toBe('Geist Mono')
+  expect(fonts.loaded).toEqual(expect.arrayContaining(['Geist', 'Geist Mono']))
+})
 
 test('every published lesson changes its visible SVG at each step', async ({ page }) => {
   test.setTimeout(90_000)

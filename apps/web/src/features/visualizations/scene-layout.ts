@@ -30,7 +30,7 @@ function treeRows(scene: Scene) {
   return rows.flat().length === scene.nodes.length ? rows : []
 }
 
-export function layoutScene(scene: Scene, mode: Lesson['mode']) {
+export function layoutScene(scene: Scene, mode: Lesson['mode'], compact = false) {
   const ids = scene.nodes.map((node) => node.id)
   let rows = mode === 'tree' || mode === 'layers' ? treeRows(scene) : []
   if (!rows.length) {
@@ -39,14 +39,24 @@ export function layoutScene(scene: Scene, mode: Lesson['mode']) {
       ids.slice(index * columns, (index + 1) * columns),
     )
   }
-  const width = Math.max(520, Math.max(1, ...rows.map((row) => row.length)) * 172 + 30)
-  const rowGap = mode === 'layers' ? 101 : 118
-  const height = Math.max(306, (rows.length - 1) * rowGap + 140)
+  if (compact) {
+    rows = rows.flatMap((row) =>
+      Array.from({ length: Math.ceil(row.length / 2) }, (_, i) => row.slice(i * 2, i * 2 + 2)),
+    )
+  }
+  const spacing = compact ? 149 : 172
+  const width = compact
+    ? 302
+    : Math.max(520, Math.max(1, ...rows.map((row) => row.length)) * spacing + 30)
+  const rowGap = compact ? 100 : mode === 'layers' ? 101 : 118
+  const height = compact
+    ? (rows.length - 1) * rowGap + 100
+    : Math.max(306, (rows.length - 1) * rowGap + 140)
   const points = new Map<string, Point>()
   rows.forEach((row, y) => {
     row.forEach((id, x) =>
       points.set(id, {
-        x: width / 2 + (x - (row.length - 1) / 2) * 172,
+        x: width / 2 + (x - (row.length - 1) / 2) * spacing,
         y: height / 2 + (y - (rows.length - 1) / 2) * rowGap,
       }),
     )

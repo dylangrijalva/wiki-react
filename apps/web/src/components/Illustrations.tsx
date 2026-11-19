@@ -51,7 +51,7 @@ function TinyText({ children }: { children: ReactNode }) {
     <text
       textAnchor="middle"
       dominantBaseline="central"
-      fontFamily="monospace"
+      fontFamily="var(--mono)"
       fontSize="22"
       fontWeight="600"
       fill={ink}

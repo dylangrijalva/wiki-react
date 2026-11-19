@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import type { SceneNode } from '@rendered/shared'
+import { useCompactDiagram } from '../useCompactDiagram'
 import { statusLabels } from '../SceneDiagram'
 
 const colors = {
@@ -21,11 +22,12 @@ export default function ClipTree({
   stable: boolean
 }) {
   const id = useId()
+  const compact = useCompactDiagram()
   const reduced = useReducedMotion()
   return (
     <svg
       className="rr-clip-tree"
-      viewBox="0 0 500 151"
+      viewBox={compact ? '0 0 272 233' : '0 0 500 151'}
       role="img"
       aria-labelledby={id + 'title'}
       aria-describedby={id + 'desc'}
@@ -40,19 +42,30 @@ export default function ClipTree({
         {label}
       </text>
       <g stroke="var(--rr-wire)" strokeWidth="1.6" fill="none">
-        <path d="M250 46V56H86Q80 56 80 63V74M250 56V74M250 56H414Q420 56 420 63V74" />
+        <path
+          d={
+            compact
+              ? 'M96 116H112V42H122M112 116H122M112 116V190H122'
+              : 'M250 46V56H86Q80 56 80 63V74M250 56V74M250 56H414Q420 56 420 63V74'
+          }
+        />
       </g>
       <rect
-        x="173"
-        y="12"
-        width="154"
+        x={compact ? 7 : 173}
+        y={compact ? 99 : 12}
+        width={compact ? 89 : 154}
         height="34"
         rx="6"
         fill="#cdb5e9"
         stroke="#4e4358"
         strokeWidth="1.5"
       />
-      <text x="250" y="33" className="rr-clip-label" textAnchor="middle">
+      <text
+        x={compact ? 51 : 250}
+        y={compact ? 121 : 33}
+        className="rr-clip-label"
+        textAnchor="middle"
+      >
         ClipList
       </text>
       {nodes.map((n, i) => {
@@ -61,7 +74,7 @@ export default function ClipTree({
           <motion.g
             key={stable ? n.id : i}
             initial={false}
-            animate={{ x: i * 170 + 10, y: 74 }}
+            animate={compact ? { x: 122, y: i * 74 + 11 } : { x: i * 170 + 10, y: 74 }}
             transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 230, damping: 24 }}
           >
             <rect

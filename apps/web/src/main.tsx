@@ -41,7 +41,7 @@ createRoot(document.getElementById('root')!).render(
                 path="*"
                 element={
                   <div className="wrap page-title py-16">
-                    <h1 className="serif">Page not found.</h1>
+                    <h1 className="display-heading">Page not found.</h1>
                     <Link className="text-link" to="/curriculum">
                       Browse the curriculum →
                     </Link>

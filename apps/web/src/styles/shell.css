@@ -15,7 +15,7 @@
   align-items: center;
   gap: 10px;
   white-space: nowrap;
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: 28px;
   letter-spacing: -0.055em;
   font-weight: 600;
@@ -129,6 +129,7 @@
 }
 .palette-bar input {
   width: 100%;
+  min-width: 0;
   background: transparent;
   outline: 0;
 }
@@ -180,7 +181,7 @@
     justify-content: center;
   }
 }
-@media (max-width: 650px) {
+@media (max-width: 700px) {
   .nav-row {
     height: 65px;
     gap: 10px;
@@ -216,22 +217,18 @@
     gap: 12px 20px;
   }
 }
-@media (max-width: 375px) {
+@media (max-width: 400px) {
   .brand {
-    font-size: 21px;
+    font-size: clamp(19px, 5.5vw, 22px);
   }
   .brand svg {
     width: 25px;
-  }
-  .utilities .icon-btn,
-  .utilities .search-launch {
-    width: 30px;
-    height: 32px;
   }
   .utilities {
     gap: 4px;
   }
   .nav-row {
+    width: calc(100% - 24px);
     gap: 5px;
   }
 }

@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { Lesson, Step } from '@rendered/shared'
+import { useCompactDiagram } from './useCompactDiagram'
 import { connector, layoutScene, nodeHeight, nodeWidth, wrap } from './scene-layout'
 
 export const statusLabels = {
@@ -54,7 +55,8 @@ export function SceneDiagram({
 }) {
   const mid = useId().replace(/:/g, '')
   const reduced = useReducedMotion()
-  const { width, height, points } = layoutScene(scene, mode)
+  const compact = useCompactDiagram()
+  const { width, height, points } = layoutScene(scene, mode, compact)
   const colors = [...new Set(scene.nodes.map((n) => n.status ?? 'idle'))]
   const summary = scene.nodes
     .map(

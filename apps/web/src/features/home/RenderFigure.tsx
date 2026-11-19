@@ -16,13 +16,7 @@ function Tag({ x, y, text }: { x: number; y: number; text: string }) {
         stroke="#6e7067"
         strokeWidth="1"
       />
-      <text
-        y="5"
-        textAnchor="middle"
-        fontFamily="IBM Plex Mono,monospace"
-        fontSize="11"
-        fill="#32342f"
-      >
+      <text y="5" textAnchor="middle" fontFamily="var(--mono)" fontSize="11" fill="#32342f">
         {text}
       </text>
     </g>
@@ -115,7 +109,7 @@ export default function RenderFigure() {
             <text
               fill="#354f40"
               stroke="none"
-              fontFamily="monospace"
+              fontFamily="var(--mono)"
               textAnchor="middle"
               y="9"
               fontSize="30"
@@ -128,7 +122,7 @@ export default function RenderFigure() {
             <text
               fill="#60412f"
               stroke="none"
-              fontFamily="monospace"
+              fontFamily="var(--mono)"
               textAnchor="middle"
               y="8"
               fontSize="25"
@@ -143,7 +137,7 @@ export default function RenderFigure() {
           <Tag x={407} y={46} text="&lt;App /&gt;" />
           <Tag x={73} y={149} text="state" />
           <Tag x={467} y={146} text="view" />
-          <g fill="#716f65" fontFamily="IBM Plex Mono,monospace" fontSize="10">
+          <g fill="#716f65" fontFamily="var(--mono)" fontSize="10">
             <text x="191" y="123" transform="rotate(-26 191 123)">
               props
             </text>

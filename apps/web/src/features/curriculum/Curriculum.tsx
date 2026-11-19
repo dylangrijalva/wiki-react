@@ -63,7 +63,7 @@ export default function Curriculum() {
   return (
     <div className="wrap catalog-page">
       <div className="page-title">
-        <h1 className="serif">
+        <h1 className="display-heading">
           The curriculum<span>.</span>
         </h1>
         <p>

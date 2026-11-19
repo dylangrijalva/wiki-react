@@ -66,7 +66,7 @@ export default function ProgressPage() {
   return (
     <div className="wrap progress-page">
       <div className="page-title">
-        <h1 className="serif">
+        <h1 className="display-heading">
           My progress<span>.</span>
         </h1>
         <p>Reopen a lesson in this browser to return to the step where you left off.</p>
