@@ -158,6 +158,8 @@ export default function Shell() {
             <Link to="/curriculum">Curriculum</Link>
             <Link to="/progress">My progress</Link>
             <a href="https://react.dev/learn">React documentation ↗</a>
+            <a href="https://github.com/dylangrijalva">GitHub ↗</a>
+            <a href="https://x.com/dylangrijalva">X ↗</a>
           </nav>
         </div>
       </footer>
