@@ -7,11 +7,12 @@ export const performance: Lesson[] = [
     trackId: 'performance',
     title: 'Understanding re-renders',
     mode: 'tree',
-    objective: 'Distinguish component calls from visible DOM changes when a mixer meter updates.',
+    objective:
+      'Trace a new meter reading through Mixer and see which component functions run before React updates the DOM.',
     steps: [
       step(
-        'Map the tree',
-        'Mixer currently owns the signal level. It renders a level meter and an unrelated song title as children.',
+        'Find the level state',
+        'Mixer stores the signal level and passes it to Meter. Its other child, SongTitle, has no use for the reading.',
         'function Mixer() {\n  const [level, setLevel] = useState(0);\n  return <><Meter level={level} /><SongTitle /></>;\n}',
         [
           node('m', 'Mixer', 'kept', 'level = 0'),
@@ -24,15 +25,15 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Schedule an update',
-        'A new reading arrives. Updating the level asks React to render Mixer with its next snapshot.',
+        'Receive the next reading',
+        'The sensor reports 7. Calling setLevel(7) asks React to render Mixer again with 7 as its level.',
         'setLevel(7);',
         [node('input', 'Reading', 'added', '7'), node('m', 'Mixer', 'active', 'level = 7')],
         [['input', 'm']],
       ),
       step(
-        'Follow ordinary children',
-        'In this example neither child is memoized. Calling Mixer returns new child elements and React normally calls both child functions as part of this render.',
+        'Follow the child renders',
+        'Mixer returns new elements for Meter and SongTitle. Neither child uses memo here, so React normally calls both functions on this render.',
         '<>\n  <Meter level={7} />\n  <SongTitle />\n</>',
         [
           node('m', 'Mixer', 'active'),
@@ -45,8 +46,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Find the DOM edit',
-        'Meter describes a new value. SongTitle produces identical output, so its DOM can stay as it was even though the function ran.',
+        'Check what reaches the DOM',
+        'Meter now returns a meter value of 7. SongTitle ran too, but it returned the same title, so React can keep the existing title DOM.',
         '<meter min={0} max={10} value={level} />',
         [
           node('meter', 'Meter DOM', 'active', 'value = 7'),
@@ -54,8 +55,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Move the owner',
-        'If only Meter needs level, move the state and sensor subscription into Meter. The next reading can start rendering there without calling Mixer for this update.',
+        'Move the sensor into Meter',
+        'Only Meter needs the reading. If it owns the subscription and the level state, React can start the next update at Meter and leave Mixer out of it.',
         'function Meter() {\n  const level = useSignalLevel();\n  return <meter min={0} max={10} value={level} />;\n}',
         [
           node('m', 'Mixer', 'kept'),
@@ -68,21 +69,24 @@ export const performance: Lesson[] = [
         ],
       ),
     ],
-    pitfall: 'Counting DOM mutations misses work spent computing identical output.',
+    pitfall:
+      'A DOM observer sees the meter change. It misses the work SongTitle did to produce the same title.',
     practice:
-      'Start by locating state near its consumers. Use React DevTools Profiler to investigate slow interactions before changing component boundaries.',
+      'Keep the level state near the component that uses it. If an interaction feels slow, record it in the React DevTools Profiler before moving more state.',
     recap:
-      'State ownership sets the starting point for an update. React can call components whose existing DOM remains valid.',
+      'Where you store the reading determines where React starts this update. A component can run again and still return output that fits the existing DOM.',
     source: 'https://react.dev/learn/render-and-commit',
     quiz: {
-      question: 'A child function ran. What can you conclude about its DOM?',
+      question:
+        'SongTitle ran during the meter update. What does that tell you about the title in the DOM?',
       options: [
-        'It was replaced',
-        'Its output was computed, and the DOM may be unchanged',
-        'Every sibling was removed',
+        'React replaced the title element',
+        'React computed the title again. Its DOM may be unchanged.',
+        'React removed every sibling of the title',
       ],
       answer: 1,
-      explanation: 'React compares the output before committing any required DOM changes.',
+      explanation:
+        'React compares the new output with the previous output. Matching title text can stay in place even though SongTitle ran.',
     },
   },
   {
@@ -90,11 +94,12 @@ export const performance: Lesson[] = [
     trackId: 'performance',
     title: 'When memoization helps',
     mode: 'compare',
-    objective: 'Predict when an expensive spectrum chart can reuse work after a theme update.',
+    objective:
+      'Find out whether Spectrum needs to calculate its frequency bins again when someone changes the theme.',
     steps: [
       step(
-        'Choose an interaction',
-        'A theme toggle renders the page again. Its Spectrum child computes frequency bins from an unchanged sample array. The diagram counts simulated chart calculations. Use a profiler for actual durations.',
+        'Toggle the theme',
+        'The page renders again when the theme changes. Spectrum gets the same sample array as before and calculates its frequency bins again. The diagram counts simulated calculations. A profiler can tell you how long a real one takes.',
         'function Spectrum({ samples }: { samples: number[] }) {\n  return <Bars values={computeBins(samples)} />;\n}',
         [
           node('page', 'Page', 'active', 'theme change'),
@@ -103,8 +108,8 @@ export const performance: Lesson[] = [
         [['page', 'chart']],
       ),
       step(
-        'Add a memo boundary',
-        'Wrap Spectrum once at module scope. For a parent update, React normally skips the wrapped component when every prop compares equal with Object.is.',
+        'Wrap Spectrum in memo',
+        'Create StableSpectrum once, outside the page component. On a parent update, React can skip Spectrum if Object.is considers each prop equal to its previous value.',
         'const StableSpectrum = memo(Spectrum);',
         [
           node('page', 'Page', 'active'),
@@ -117,8 +122,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Reuse the input',
-        'Toggling theme leaves the original sample array intact. Here Spectrum reads neither theme context nor its own changed state, so its computation can be skipped.',
+        'Pass the same samples',
+        'The theme toggle leaves recording.samples pointing to the original array. Spectrum doesn’t read the theme context, and its own state hasn’t changed. React can reuse its last result.',
         '<StableSpectrum samples={recording.samples} />',
         [
           node('page', 'Page', 'active'),
@@ -131,8 +136,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Break the comparison',
-        'Spreading the samples creates a new array. Its contents match, but its reference differs and the default prop comparison sees a change.',
+        'Try a copy of the array',
+        'Spreading recording.samples creates a separate array on every render. Object.is sees two different arrays even though they contain the same samples.',
         '<StableSpectrum samples={[...recording.samples]} />',
         [
           node('page', 'Page', 'active'),
@@ -145,8 +150,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Measure the actual cost',
-        'A genuinely changed recording should recompute. Compare the slow interaction on representative hardware with the Profiler. Compare commits with and without the optimization. React Compiler can also supply memoization in compiled code.',
+        'Time the chart',
+        'A different recording needs new frequency bins. On hardware your listeners might use, profile the same slow interaction with and without memo and compare the render times across commits. React Compiler can also memoize components when it compiles them.',
         '<Profiler id="Spectrum" onRender={recordDuration}>\n  <StableSpectrum samples={recording.samples} />\n</Profiler>',
         [
           node('input', 'Recording', 'added', 'new samples'),
@@ -160,17 +165,22 @@ export const performance: Lesson[] = [
       ),
     ],
     pitfall:
-      'A custom equality function that ignores a changed callback can leave a handler reading stale values.',
+      'If a custom prop comparison ignores a new callback, the chart can keep calling an old one that reads stale values.',
     practice:
-      'Prefer stable, minimal props. The cost of comparing props should be worth the work you expect to avoid.',
+      'Pass only the props the chart needs, and keep their references stable when the values stay the same. Comparing them should cost less than rendering the chart.',
     recap:
-      'memo is a performance optimization. Own state, consumed context, or changed props can still cause a render.',
+      'memo can save a render triggered by a parent. Spectrum can still render for a new prop, a change to its own state, or an update to context it reads.',
     source: 'https://react.dev/reference/react/memo',
     quiz: {
-      question: 'Which prop value can defeat the default memo comparison on every parent render?',
-      options: ['An unchanged string', 'The original sample array', 'A newly spread sample array'],
+      question: 'Which prop value will look different to memo each time the parent renders?',
+      options: [
+        'The same string value',
+        'The original sample array',
+        'A fresh copy made with [...recording.samples]',
+      ],
       answer: 2,
-      explanation: 'Object.is distinguishes two array objects even if their elements are equal.',
+      explanation:
+        'Each spread creates a new array. Object.is compares the two array references, even when every sample matches.',
     },
   },
   {
@@ -178,11 +188,12 @@ export const performance: Lesson[] = [
     trackId: 'performance',
     title: 'Code splitting and lazy loading',
     mode: 'timeline',
-    objective: 'Defer an optional score editor and keep the transport usable while its code loads.',
+    objective:
+      'Load the score editor when a listener opens it, and keep the playback controls usable while they wait.',
     steps: [
       step(
-        'Draw the split',
-        'The player is used immediately. The score editor is opened on demand, which makes it a candidate for a separate bundle chunk.',
+        'Split out the score editor',
+        'Every listener needs the player at startup. Only someone who opens the score editor needs its code, so it can go in a separate bundle chunk.',
         'const ScoreEditor = lazy(() => import("./ScoreEditor"));',
         [
           node('initial', 'Player', 'kept', 'entry chunk'),
@@ -190,8 +201,8 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Request the component',
-        'React first calls the lazy loader when it tries to render ScoreEditor. Declare it at module scope so the component identity survives parent renders.',
+        'Open the score editor',
+        'React calls the loader the first time it tries to render ScoreEditor. Declare the lazy component at module scope so each parent render refers to the same component type.',
         '{editing && <ScoreEditor />}',
         [
           node('open', 'Edit score', 'active'),
@@ -200,8 +211,8 @@ export const performance: Lesson[] = [
         [['open', 'editor']],
       ),
       step(
-        'Show local feedback',
-        'While the import is pending, the nearest Suspense boundary can show its fallback. Transport outside that boundary stays available.',
+        'Keep playback available',
+        'While the import is pending, the nearest Suspense boundary can show EditorSkeleton. Transport sits outside the boundary, so the listener can still use the playback controls.',
         '<>\n  <Transport />\n  <Suspense fallback={<EditorSkeleton />}>\n    {editing && <ScoreEditor />}\n  </Suspense>\n</>',
         [
           node('transport', 'Transport', 'kept'),
@@ -211,8 +222,8 @@ export const performance: Lesson[] = [
         [['boundary', 'fallback']],
       ),
       step(
-        'Reveal the editor',
-        'When the module resolves, React can render its default export. The boundary replaces the placeholder with the editor.',
+        'Replace the skeleton',
+        'Once the module loads, React can render its default export, ScoreEditor. The editor takes the place of the skeleton.',
         'export default function ScoreEditor() {\n  return <ScoreCanvas />;\n}',
         [
           node('boundary', 'Suspense', 'kept'),
@@ -222,8 +233,8 @@ export const performance: Lesson[] = [
         [['boundary', 'editor']],
       ),
       step(
-        'Handle a failed import',
-        'A rejected import reaches an error boundary. Offer a recovery that can load the current assets, such as reloading the page after an outdated deployment.',
+        'Recover from a missing chunk',
+        'If the import rejects, React passes the error to the nearest error boundary. A tab left open during a deployment might still request an old chunk. A Reload button lets the listener fetch the current app.',
         '<EditorErrorBoundary>\n  <Suspense fallback={<EditorSkeleton />}><ScoreEditor /></Suspense>\n</EditorErrorBoundary>',
         [
           node('error', 'Import', 'removed', 'rejected'),
@@ -237,18 +248,18 @@ export const performance: Lesson[] = [
       ),
     ],
     pitfall:
-      'Declaring lazy inside another component can reset local state by creating a different component type.',
+      'Calling lazy inside a parent component creates a new component type on each render. The editor can lose its local state.',
     practice:
-      'Split at user-visible boundaries. Too many tiny chunks introduce request overhead and additional loading states.',
+      'An optional editor makes a useful split point. Dividing it into many tiny chunks adds requests and can leave listeners waiting for one piece after another.',
     recap:
-      'lazy defers module loading to first use. Suspense handles the wait, and an error boundary handles a rejected import.',
+      'Opening the editor triggers its first import. Suspense can show a skeleton while the import is pending. If the import rejects, the error boundary can offer a reload.',
     source: 'https://react.dev/reference/react/lazy',
     quiz: {
       question: 'Where should the lazy component declaration live?',
       options: ['At module scope', 'Inside every render', 'Inside the fallback'],
       answer: 0,
       explanation:
-        'A module-level declaration preserves the component identity across parent renders.',
+        'At module scope, ScoreEditor keeps the same component identity when its parent renders again.',
     },
   },
   {
@@ -256,18 +267,19 @@ export const performance: Lesson[] = [
     trackId: 'performance',
     title: 'Virtualizing long lists',
     mode: 'window',
-    objective: 'Calculate which clip rows a fixed-height scrolling window needs to mount.',
+    objective:
+      'Calculate which clip rows to mount as a listener scrolls through a library of 10,000 clips.',
     steps: [
       step(
-        'Estimate the full height',
-        'A catalogue has 10,000 rows of 32 pixels each. A spacer reserves their combined height so the scroll bar reflects the full collection.',
+        'Reserve the full scroll height',
+        'Each of the 10,000 rows is 32 pixels tall. A 320,000-pixel spacer gives the scrollbar the right range even when only a few rows are mounted.',
         'const rowHeight = 32;\nconst fullHeight = clips.length * rowHeight;',
         [node('all', '10,000 rows', 'kept'), node('space', 'Spacer', 'active', '320,000 px')],
         [['all', 'space']],
       ),
       step(
-        'Locate the first visible row',
-        'With a scroll offset of 320 pixels, the first visible item has zero-based index 10. This arithmetic assumes equal row heights.',
+        'Find the first visible row',
+        'Scroll down 320 pixels and row 10 reaches the top. Row numbers start at zero, and every row has the same height, so divide the offset by 32 and round down.',
         'const first = Math.floor(scrollTop / rowHeight);',
         [
           node('offset', 'Scroll top', 'active', '320 px'),
@@ -276,8 +288,8 @@ export const performance: Lesson[] = [
         [['offset', 'first']],
       ),
       step(
-        'Include the viewport',
-        'A 96-pixel viewport at this exact offset contains indices 10 through 12. Rounding the exclusive end upward includes a partially visible last row at other offsets.',
+        'Find the end of the window',
+        'At that offset a 96-pixel viewport fits rows 10 through 12 exactly. At other offsets, part of the next row may show. Round up to get the first index to leave out of the slice.',
         'const end = Math.min(clips.length,\n  Math.ceil((scrollTop + viewportHeight) / rowHeight));',
         [
           node('r10', 'Row 10', 'active'),
@@ -286,38 +298,39 @@ export const performance: Lesson[] = [
         ],
       ),
       step(
-        'Add overscan',
-        'Render a small buffer before and after the visible rows. This reduces empty flashes during a scroll at the cost of mounting a few extra rows.',
+        'Give scrolling a buffer',
+        'Mount one extra row on either side of the viewport. This buffer, called overscan, costs two extra rows here and reduces blank flashes as the listener scrolls.',
         'const from = Math.max(0, first - 1);\nconst to = Math.min(clips.length, end + 1);',
         [
           node('r9', 'Row 9', 'added', 'buffer'),
-          node('view', 'Rows 10–12', 'active', 'visible'),
+          node('view', 'Rows 10 to 12', 'active', 'visible'),
           node('r13', 'Row 13', 'added', 'buffer'),
         ],
       ),
       step(
-        'Position the window',
-        'Place the rendered slice at its offset inside the full-height spacer. Preserve a durable key for each clip. Store editable drafts outside rows that may unmount.',
+        'Position the mounted rows',
+        'Move the slice down inside the spacer by the height of the rows before it. Use the clip ID as each key. A row can unmount when it scrolls away, so keep any drafts you need to preserve outside the row.',
         '<div style={{ height: fullHeight }}>\n  <div style={{ transform: `translateY(${from * rowHeight}px)` }}>\n    {clips.slice(from, to).map(c => (\n      <div key={c.id} style={{ height: rowHeight }}><Row clip={c} /></div>\n    ))}\n  </div>\n</div>',
         [
           node('r9', 'Row 9', 'removed', 'scrolled away'),
           node('r10', 'Row 10', 'kept', 'upper buffer'),
-          node('view', 'Rows 11–13', 'active', 'next viewport'),
+          node('view', 'Rows 11 to 13', 'active', 'next viewport'),
           node('r14', 'Row 14', 'added', 'lower buffer'),
         ],
       ),
     ],
-    pitfall: 'Assuming a fixed height when titles wrap makes the computed offsets drift.',
+    pitfall:
+      'If a long title wraps onto a second line, the fixed-height calculation puts later rows at the wrong offset.',
     practice:
-      'Use measurement for variable-height rows. Plan keyboard focus, browser find, and assistive navigation before virtualizing interactive lists.',
+      'Measure rows whose heights can vary. Before virtualizing an interactive list, check what happens to keyboard focus, browser Find, and screen reader navigation when a row leaves the DOM.',
     recap:
-      'Virtualization keeps a full scroll range but mounts a moving slice. Overscan trades extra DOM work for smoother scrolling.',
+      'The spacer keeps the scrollbar sized for the whole library. As it scrolls, the list mounts the visible rows plus a few neighbors to make scrolling smoother.',
     source: 'https://tanstack.com/virtual/latest/docs/api/virtualizer',
     quiz: {
-      question: 'With 32-pixel rows, which zero-based row starts at scroll offset 320?',
+      question: 'Rows are 32 pixels tall and numbered from zero. Which row starts 320 pixels down?',
       options: ['9', '10', '32'],
       answer: 1,
-      explanation: '320 divided by the fixed row height of 32 gives index 10.',
+      explanation: 'Ten rows fit in the first 320 pixels. Row 10 starts just below them.',
     },
   },
 ]

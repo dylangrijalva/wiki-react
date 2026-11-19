@@ -52,12 +52,12 @@ export default function Lifecycle() {
       }
       result={
         change === 'switch'
-          ? `The cleanup closes ${previous} before setup connects to ${station}.`
+          ? `Cleanup closes the ${previous} stream before setup opens ${station}.`
           : change === 'unmount'
-            ? 'Removing the player runs the last cleanup. The stream is closed.'
+            ? 'When the player unmounts, its cleanup closes the current stream.'
             : change === 'repeat'
-              ? 'The dependency stayed equal. This commit keeps the existing subscription.'
-              : `After the component commits, setup opens the ${station} stream. This model shows the production lifecycle.`
+              ? 'The station is unchanged, so the effect keeps the same connection.'
+              : `In production, setup opens the ${station} stream after React commits the player.`
       }
     />
   )

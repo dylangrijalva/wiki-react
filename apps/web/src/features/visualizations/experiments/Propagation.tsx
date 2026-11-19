@@ -31,8 +31,8 @@ export default function Propagation() {
       ))}
       result={
         started
-          ? `The setter queues a render in Mixer. Both un-memoized channel children render with soloId = ${solo ?? 'null'}.`
-          : 'Both channels read one selection from Mixer. Choose a channel to update their parent.'
+          ? `Updating soloId to ${solo ?? 'null'} queues a Mixer render. Neither channel uses memo, so Lead and Bass both render again.`
+          : 'Mixer holds the solo selection for both channels. Choose Lead or Bass to change it.'
       }
     />
   )

@@ -15,13 +15,13 @@ export default function Reconciliation() {
   const result =
     operation === 'Swap'
       ? stable
-        ? 'The draft follows Hat to the first position. All three row instances keep their state.'
-        : 'The draft stays in slot 3. The row now displays Kick with Hat’s old draft.'
+        ? 'Hat moves to the first row with its draft. All three clips keep their row state.'
+        : 'Kick moves into the third row and inherits the draft you were editing for Hat.'
       : operation === 'Replace'
         ? stable
-          ? 'Snare unmounts. Clap gets a new row and new local state.'
-          : 'Slot 2 keeps its old instance when Snare becomes Clap.'
-        : 'The same key and component type preserve the row. Its label changes to Open hat.'
+          ? 'Snare unmounts. Clap mounts with an empty draft.'
+          : 'The second row keeps Snare’s local state when it shows Clap. Both clips use the same index key.'
+        : 'Renaming Hat to Open hat keeps the same key and component type, so its draft survives.'
   const oldNodes = initialClips.map((clip, i) =>
     node(
       'old' + i,
@@ -44,7 +44,7 @@ export default function Reconciliation() {
     <div className="rr-lab">
       <div className="rr-lab-title">
         <FlaskConical size={15} />
-        Match two clip lists
+        See which row keeps its draft
       </div>
       <div className="rr-tree-pair">
         {[

@@ -30,7 +30,7 @@ export default function ClipTree({
       aria-labelledby={id + 'title'}
       aria-describedby={id + 'desc'}
     >
-      <title id={id + 'title'}>{label} clip tree</title>
+      <title id={id + 'title'}>Clip tree ({label.toLowerCase()})</title>
       <desc id={id + 'desc'}>
         {nodes
           .map((n) => `${n.label}, ${statusLabels[n.status ?? 'idle']}, ${n.detail}.`)

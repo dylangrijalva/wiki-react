@@ -5,9 +5,9 @@ export default function Composition() {
   const [transport, setTransport] = useState(false)
   const [caption, setCaption] = useState(false)
   const nodes = [
-    node('frame', 'Frame', 'children slot', 'kept'),
+    node('frame', 'Frame', 'children prop', 'kept'),
     node('wave', 'Waveform', 'clip preview', 'kept'),
-    ...(transport ? [node('transport', 'Transport', 'play controls', 'added')] : []),
+    ...(transport ? [node('transport', 'Transport', 'playback controls', 'added')] : []),
     ...(caption ? [node('caption', 'Caption', 'clip title', 'added')] : []),
   ]
   return (
@@ -18,18 +18,18 @@ export default function Composition() {
       controls={
         <>
           <button aria-pressed={transport} onClick={() => setTransport(!transport)}>
-            {transport ? 'Remove' : 'Add'} transport
+            {transport ? 'Remove' : 'Add'} playback controls
           </button>
           <button aria-pressed={caption} onClick={() => setCaption(!caption)}>
             {caption ? 'Remove' : 'Add'} caption
           </button>
         </>
       }
-      result={`Frame renders ${nodes.length - 1} ${nodes.length === 2 ? 'child' : 'children'} supplied by the caller. Its own implementation stays the same.`}
+      result={`The caller passes ${nodes.length - 1} ${nodes.length === 2 ? 'child' : 'children'} to Frame. The same Frame component renders whichever pieces you choose.`}
     >
-      <div className="rr-preview" aria-label="Composed clip preview">
+      <div className="rr-preview" aria-label="Clip preview">
         <AudioLines size={26} />
-        {transport && <span aria-label="transport preview">◀ ▶ ▶|</span>}
+        {transport && <span aria-label="Playback controls in the preview">◀ ▶ ▶|</span>}
         {caption && <small>Tape loop 01</small>}
       </div>
     </Lab>

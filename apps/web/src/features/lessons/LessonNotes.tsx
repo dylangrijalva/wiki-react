@@ -70,7 +70,7 @@ export function LessonNotes({ lesson, index }: { lesson: Lesson; index: number }
         <p>{lesson.practice}</p>
       </details>
       <a className="rr-source" href={lesson.source} target="_blank" rel="noreferrer">
-        Read the source guide <ExternalLink size={12} />
+        Read the documentation <ExternalLink size={12} />
       </a>
     </aside>
   )
@@ -112,7 +112,7 @@ export function KnowledgeCheck({
       </div>
       {answer !== null && (
         <p role="status" className={'rr-feedback ' + (correct ? 'is-correct' : '')}>
-          {correct ? lesson.quiz.explanation : 'Take another look at the diagram, then try again.'}
+          {correct ? lesson.quiz.explanation : 'Check the diagram and try again.'}
         </p>
       )}
       {(correct || completed) && (

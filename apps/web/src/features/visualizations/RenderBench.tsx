@@ -3,9 +3,9 @@ import { motion, useReducedMotion } from 'motion/react'
 
 const captions = [
   'Player returns a title and a play counter.',
-  'A click queues an update inside PlayCount.',
+  'Clicking the play button queues an update in PlayCount.',
   'PlayCount returns a button showing one play. The DOM still shows zero.',
-  'React commits the new text to the existing button.',
+  'React updates the text in the same button.',
   'The browser paints the updated count.',
 ]
 function Card({
@@ -165,7 +165,7 @@ export function RenderBench({
               fill="#efe2f8"
             />
             <text x="72" y="18" textAnchor="middle" {...text}>
-              {['', 'queue: +1', 'next text: 1', 'text committed', 'paint complete'][index]}
+              {['', 'queue: +1', 'next text: 1', 'button updated', '1 play on screen'][index]}
             </text>
           </g>
         )}

@@ -29,7 +29,7 @@ export function LessonNavigation({
         <Search size={15} />
         <input
           type="search"
-          aria-label="Search lesson navigation"
+          aria-label="Find a lesson by title"
           placeholder="Find a lesson…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -80,7 +80,7 @@ export function LessonNavigation({
           </div>
         )
       })}
-      {!filtered.length && <p className="rr-no-results">No matching lessons.</p>}
+      {!filtered.length && <p className="rr-no-results">No lesson titles match your search.</p>}
     </nav>
   )
 }

@@ -59,7 +59,7 @@ export default function RenderFigure() {
         <svg
           ref={canvas}
           role="img"
-          aria-label="App branches into State and View components, which render three child elements."
+          aria-label="App passes props to State and View. State has two children and View has one."
           viewBox="24 0 500 289"
           className="hero-diagram"
         >
@@ -156,7 +156,7 @@ export default function RenderFigure() {
       <figcaption>
         <span>
           <Radio size={15} />
-          Render propagation
+          Props flow from parent to child
         </span>
         {!reduced && (
           <div>

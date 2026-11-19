@@ -10,8 +10,8 @@ describe('Hands-on experiments', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Row key' }), {
       target: { value: 'index' },
     })
-    expect(screen.getByText(/Kick with Hat’s old draft/)).toBeTruthy()
-    const after = screen.getByRole('img', { name: 'After clip tree' })
+    expect(screen.getByText(/inherits the draft you were editing for Hat/)).toBeTruthy()
+    const after = screen.getByRole('img', { name: 'Clip tree (after)' })
     expect(after.querySelector('desc')?.textContent).toContain('Kick, Active, draft: editing')
   })
 
@@ -21,14 +21,14 @@ describe('Hands-on experiments', () => {
     press('Open collection')
     press('Resolve request')
     press('Open collection')
-    expect(screen.getByText(/reads fresh cached data/)).toBeTruthy()
-    press('Expire freshness')
+    expect(screen.getByText(/reads fresh clips from the cache/)).toBeTruthy()
+    press('Mark cache stale')
     press('Open collection')
     press('Fail request')
     expect(screen.getByRole('img').querySelector('desc')?.textContent).toContain(
       'show cached clips',
     )
-    expect(screen.getByText(/earlier data is still available/)).toBeTruthy()
+    expect(screen.getByText(/keep the cached clips on screen/)).toBeTruthy()
   })
 
   it('closes the previous station on a change and cleans up the current station on unmount', () => {

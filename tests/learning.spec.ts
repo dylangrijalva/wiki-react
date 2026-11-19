@@ -27,6 +27,7 @@ test('learn, resume, save, finish the check and revisit from the dashboard', asy
   await page.getByRole('link', { name: 'Start learning' }).click()
   const lesson: Lesson = await (await page.request.get('/api/lessons/' + slug)).json()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(lesson.title)
+  await expect(page).toHaveTitle(lesson.title + ' · React, Rendered')
   await expect(page.getByRole('button', { name: 'Previous' })).toBeDisabled()
   const nextWrite = page.waitForResponse(
     (response) =>
@@ -123,7 +124,9 @@ test('compares stable row identities and inserted children', async ({ page }) =>
   await page.getByRole('button', { name: 'Replace', exact: true }).click()
   await expect(page.getByText('Snare unmounts.', { exact: false })).toBeVisible()
   await page.getByLabel('Row key').selectOption('index')
-  await expect(page.getByText('Slot 2 keeps its old instance', { exact: false })).toBeVisible()
+  await expect(
+    page.getByText('The second row keeps Snare’s local state', { exact: false }),
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Reset experiment' }).click()
   await expect(page.getByLabel('Row key')).toHaveValue('id')
   await openExperiment(page, 'component-composition')
@@ -135,14 +138,14 @@ test('changes parent state and observes cleanup before a new setup', async ({ pa
   await openExperiment(page, 'lifting-state-up')
   await page.getByRole('button', { name: 'Solo Bass' }).click()
   await expect(
-    page.getByText('Both un-memoized channel children render with soloId = Bass.', {
+    page.getByText('Updating soloId to Bass queues a Mixer render.', {
       exact: false,
     }),
   ).toBeVisible()
   await openExperiment(page, 'effect-lifecycle')
   await page.getByRole('button', { name: 'Change station' }).click()
   await expect(
-    page.getByText('The cleanup closes Jazz before setup connects to Folk.'),
+    page.getByText('Cleanup closes the Jazz stream before setup opens Folk.'),
   ).toBeVisible()
   await page.getByRole('button', { name: 'Unmount player' }).click()
   await expect(page.getByRole('button', { name: 'Render again' })).toBeDisabled()
@@ -152,19 +155,19 @@ test('compares memoized updates and cached background requests', async ({ page }
   await openExperiment(page, 'memoization')
   await page.getByRole('button', { name: 'Memo off' }).click()
   await page.getByRole('button', { name: 'Change theme', exact: true }).click()
-  await expect(page.getByText('This model skips the chart render.', { exact: false })).toBeVisible()
+  await expect(page.getByText('memo skips this render.', { exact: false })).toBeVisible()
   await openExperiment(page, 'fetching-and-caching')
   await page.getByRole('button', { name: 'Open collection' }).click()
   await page.getByRole('button', { name: 'Resolve request' }).click()
   await page.getByRole('button', { name: 'Open collection' }).click()
-  await expect(
-    page.getByText('Another observer reads fresh cached data', { exact: false }),
-  ).toBeVisible()
-  await page.getByRole('button', { name: 'Expire freshness' }).click()
+  await expect(page.getByText('reads fresh clips from the cache', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'Mark cache stale' }).click()
   await page.getByRole('button', { name: 'Open collection' }).click()
   await page.getByRole('button', { name: 'Fail request' }).click()
   await expect(
-    page.getByText('Refresh failed. The earlier data is still available', { exact: false }),
+    page.getByText('The list can show the error and keep the cached clips on screen.', {
+      exact: false,
+    }),
   ).toBeVisible()
 })
 

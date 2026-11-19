@@ -164,7 +164,11 @@ function Studio({
           <p className="rr-objective">{lesson.objective}</p>
           {(bookmark.isError || bookmarks.isError) && (
             <p role="alert">
-              Bookmarks could not be updated.{' '}
+              {bookmarks.isError
+                ? 'We couldn’t load your bookmarks.'
+                : bookmarked
+                  ? 'We couldn’t remove this bookmark.'
+                  : 'We couldn’t bookmark this lesson.'}{' '}
               <button
                 onClick={() =>
                   bookmarks.isError
@@ -182,7 +186,7 @@ function Studio({
           </div>
           {saveError && (
             <p role="alert">
-              Your progress could not be saved.{' '}
+              We couldn’t save your lesson progress.{' '}
               <button onClick={() => failedWrite && save(failedWrite)}>Save again</button>
             </p>
           )}
@@ -216,6 +220,10 @@ export default function LessonPage() {
     lessons = useLessons(),
     tracks = useTracks(),
     progress = useProgress()
+  const title = lesson.data?.title ?? 'Lesson'
+  useEffect(() => {
+    document.title = title + ' · React, Rendered'
+  }, [title])
   const queries = [lesson, lessons, tracks, progress]
   if (queries.some((q) => q.isError))
     return (

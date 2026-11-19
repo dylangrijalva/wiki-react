@@ -7,18 +7,19 @@ export const production: Lesson[] = [
     trackId: 'production',
     title: 'Forms and validation',
     mode: 'flow',
-    objective: 'Preserve a clip title draft while validating it on both sides of a save request.',
+    objective:
+      'Let someone edit a clip title and keep their draft if the form or the server rejects it.',
     steps: [
       step(
-        'Keep a string draft',
-        'A controlled text input receives its current value from state. Start with an empty string for a new clip so it stays controlled throughout its lifetime.',
+        'Start with an empty title',
+        'The input displays whatever string is in title. For a new clip, start with an empty string so React controls the input from its first render.',
         'const [title, setTitle] = useState("");\n<label>Clip title<input value={title}\n  onChange={e => setTitle(e.target.value)} /></label>',
         [node('input', 'Title field', 'active', 'empty'), node('draft', 'Draft', 'kept', '""')],
         [['draft', 'input']],
       ),
       step(
-        'Preserve edits as typed',
-        'Write the exact input value on change. Trimming on every keystroke would make typing a space between words frustrating. Normalize at submission instead.',
+        'Keep the space after Rain',
+        'Copy the input value into state as the person types. If you trim after every keystroke, the space after Rain disappears before they can type walk. Trim when they submit the title.',
         '<input value={title} onChange={event => setTitle(event.target.value)} />',
         [
           node('input', 'Title field', 'active', 'Rain '),
@@ -27,13 +28,13 @@ export const production: Lesson[] = [
         [['input', 'draft']],
       ),
       step(
-        'Validate at submission',
-        'Handle form submission so pressing Enter and clicking Save follow one path. On failure, leave the draft in place and explain the rule beside the field.',
+        'Check the submitted title',
+        'Handle the form’s submit event so clicking Save and pressing Enter run the same check. A title that trims to an empty string fails. Keep the draft in the field and explain the 1-to-80-character limit beside it.',
         'const Title = z.string().trim().min(1).max(80);\nfunction submit(e: React.FormEvent<HTMLFormElement>) {\n  e.preventDefault();\n  const result = Title.safeParse(title);\n  if (result.success) return saveTitle(result.data);\n  setError("Enter 1 to 80 characters.");\n}',
         [
           node('draft', 'Draft', 'kept', 'spaces'),
           node('parse', 'Title schema', 'active'),
-          node('error', 'Field error', 'added', '1–80 characters'),
+          node('error', 'Field error', 'added', '1 to 80 characters'),
         ],
         [
           ['draft', 'parse'],
@@ -41,18 +42,18 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Name the error',
-        'Associate the message with its field and mark an invalid attempt. A visible label continues to identify the field after the user types.',
+        'Link the field to its error',
+        'Use aria-invalid to mark the field after an invalid submission and aria-describedby to point to its error message. The visible Clip title label stays in place while the person types.',
         '<>\n  <label htmlFor={id}>Clip title</label>\n  <input id={id} value={title} onChange={handleChange}\n    aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} />\n  {error && <p id={errorId} role="alert">{error}</p>}\n</>',
         [
           node('input', 'Title field', 'active', 'invalid'),
-          node('error', 'Message', 'active', 'linked description'),
+          node('error', 'Message', 'active', 'field description'),
         ],
         [['input', 'error']],
       ),
       step(
-        'Validate the request again',
-        'Client checks help the author correct mistakes. The server still validates the untrusted request body and returns the saved record or a useful error. Only clear the draft on success.',
+        'Check the request on the server',
+        'The form catches mistakes before sending the request. The server must still check the JSON and the title because callers can send requests directly. Return the saved clip or an error, and clear the draft only after the save succeeds.',
         'const body: unknown = await c.req.json().catch(() => undefined);\nif (body === undefined) return c.json({ error: "Invalid JSON" }, 400);\nconst parsed = z.object({ title: Title }).safeParse(body);\nif (!parsed.success) return c.json({ error: "Invalid title" }, 422);\nreturn c.json(await saveClip(parsed.data));',
         [
           node('draft', 'Draft', 'kept', 'Rain walk'),
@@ -66,14 +67,14 @@ export const production: Lesson[] = [
       ),
     ],
     pitfall:
-      'Resetting the form before the save succeeds discards the user’s work on a network failure.',
+      'If you clear the input when the request starts, a lost connection leaves the person with an empty field and an unsaved title.',
     practice:
-      'Handle the form’s submit event so Enter works. Distinguish a field correction from a retryable server failure.',
+      'Use the form’s submit handler for keyboard and pointer input. A title that’s too long needs an edit. A network failure needs a way to retry.',
     recap:
-      'Preserve the editable string, validate a submission, and let the server confirm what was saved.',
+      'Keep exactly what the person typed in the field. Validate the trimmed title on submit, then wait for the server to confirm the save before discarding the draft.',
     source: 'https://react.dev/reference/react-dom/components/input',
     quiz: {
-      question: 'Why validate the title on the server if the input already checks it?',
+      question: 'Why check the title on the server when the form already validates it?',
       options: [
         'To update the caret position',
         'Clients can bypass the form',
@@ -81,7 +82,7 @@ export const production: Lesson[] = [
       ],
       answer: 1,
       explanation:
-        'The endpoint receives untrusted data from any caller and must enforce its own input contract.',
+        'A caller can send a request directly to the endpoint. The server has to enforce the same title rules even when the form never ran.',
     },
   },
   {
@@ -90,11 +91,11 @@ export const production: Lesson[] = [
     title: 'Keyboard interactions and focus',
     mode: 'flow',
     objective:
-      'Navigate a two-tab clip inspector with one tab stop and predictable arrow-key behavior.',
+      'Use Tab and the arrow keys to move between the Summary and Notes panels of a clip inspector.',
     steps: [
       step(
         'Name the tab list',
-        'Give the group an accessible name. Each tab controls a uniquely identified panel, and each panel is labelled by its tab.',
+        'Name the group Clip inspector. Give every panel its own ID so each tab can point to its panel, and use the tab as that panel’s accessible label.',
         '<div role="tablist" aria-label="Clip inspector">{tabs}</div>',
         [
           node('group', 'Inspector', 'active', 'tablist'),
@@ -107,8 +108,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Set the active tab stop',
-        'Only the selected tab is in the page’s normal Tab sequence. Tab enters the group once, while arrows move within it.',
+        'Give the group one tab stop',
+        'Only the selected tab has tabIndex 0. Pressing Tab brings you into the group once. The arrow keys move you from one tab to the other.',
         '<button role="tab" id={tabId} aria-controls={panelId}\n  aria-selected={selected} tabIndex={selected ? 0 : -1}\n  onClick={() => select(index)}>{label}</button>',
         [
           node('before', 'Previous', 'kept'),
@@ -118,8 +119,8 @@ export const production: Lesson[] = [
         [['before', 'summary']],
       ),
       step(
-        'Move focus deliberately',
-        'For automatic activation with already-loaded panels, Right Arrow moves focus and selection together. Implement Left Arrow in reverse and wrap at either end.',
+        'Move from Summary to Notes',
+        'When both panels are already loaded, Right Arrow can focus and select Notes in one move. Left Arrow moves the other way. At either end, wrap to the opposite tab.',
         'if (e.key === "ArrowRight" || e.key === "ArrowLeft") {\n  e.preventDefault();\n  const delta = e.key === "ArrowRight" ? 1 : -1;\n  const next = (index + delta + labels.length) % labels.length;\n  select(next); refs.current[next]?.focus();\n}',
         [
           node('summary', 'Summary', 'kept', 'tabIndex -1'),
@@ -129,8 +130,8 @@ export const production: Lesson[] = [
         [['key', 'notes']],
       ),
       step(
-        'Expose the selected panel',
-        'Show the panel whose tab is selected and hide the other one. For text-only panels, a focusable panel lets Tab move the reader straight into its content.',
+        'Show the selected panel',
+        'Selecting Notes shows its panel and hides Summary. A text-only panel has no controls to tab to, so give the panel tabIndex 0 to let the next Tab reach its content.',
         '<section role="tabpanel" id={panelId} aria-labelledby={tabId}\n  hidden={!selected} tabIndex={0}>{children}</section>',
         [
           node('notes', 'Notes tab', 'active'),
@@ -140,8 +141,8 @@ export const production: Lesson[] = [
         [['notes', 'panel']],
       ),
       step(
-        'Respect the next Tab',
-        'Do not intercept Tab to cycle within a tab list. Leave a visible focus indicator as the user moves onward. If switching is slow, use manual activation with Enter or Space.',
+        'Let Tab leave the group',
+        'Leave Tab to the browser so focus can move on, with a visible focus ring. If switching panels takes time, let arrow keys move focus and have Enter or Space activate the focused tab.',
         'const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2";\n<section role="tabpanel" id={panelId} aria-labelledby={tabId}\n  hidden={!selected} tabIndex={0} className={focusRing}>{children}</section>',
         [
           node('notes', 'Notes tab', 'kept'),
@@ -155,22 +156,22 @@ export const production: Lesson[] = [
       ),
     ],
     pitfall:
-      'Updating aria-selected without moving keyboard focus leaves arrow-key users on the wrong tab.',
+      'If your arrow handler changes aria-selected but leaves focus on Summary, the screen can show Notes while the keyboard user is still on the old tab.',
     practice:
-      'Use automatic activation when content is ready immediately. Test from the preceding control through the tab list and onward.',
+      'Use automatic activation when a panel is ready to show immediately. Start on the control before the inspector, then navigate through the tabs and out the other side using just the keyboard.',
     recap:
-      'Tab moves between groups, arrow keys move within the tab list, and each selected tab identifies one visible panel.',
+      'Arrow keys move between the inspector tabs. The selected tab names the visible panel, and Tab continues through the page in focus order.',
     source: 'https://www.w3.org/WAI/ARIA/apg/patterns/tabs/',
     quiz: {
-      question: 'What should Tab do from the selected inspector tab?',
+      question: 'With focus on the selected inspector tab, where should pressing Tab take you?',
       options: [
-        'Move onward in normal focus order',
-        'Always select the next tab',
-        'Close the inspector',
+        'To the next element in the page’s focus order',
+        'To the next tab in the inspector',
+        'Out of the inspector by closing it',
       ],
       answer: 0,
       explanation:
-        'Arrow keys handle movement inside a tab list. Tab moves to the next focusable content.',
+        'Arrow keys move within the tab list. In this inspector, Tab moves from the selected tab to its focusable panel.',
     },
   },
   {
@@ -179,25 +180,25 @@ export const production: Lesson[] = [
     title: 'Testing React applications',
     mode: 'timeline',
     objective:
-      'Write a test that catches a broken rename interaction while tolerating internal refactors.',
+      'Test a clip rename through the form so you can refactor the editor without rewriting the test.',
     steps: [
       step(
-        'Choose an observable promise',
-        'A listener can rename a clip and see the new title after saving. Use that promise as the test boundary instead of testing a private state setter.',
+        'Start with a clip called Rain',
+        'Render the editor with a clip named Rain and a save function that resolves. A listener should be able to rename the clip and see the saved title. That gives the test something to check even if the editor changes how it stores state.',
         'const user = userEvent.setup();\nconst saveClip = vi.fn(async (title: string) => ({ title }));\nrender(<ClipEditor initialTitle="Rain" onSave={saveClip} />);',
         [node('user', 'Listener', 'kept'), node('editor', 'ClipEditor', 'active', 'Rain')],
         [['user', 'editor']],
       ),
       step(
-        'Locate by accessible name',
-        'A role and name describe how a user finds a control. The query also catches a missing field label.',
+        'Find the title field',
+        'Look up the textbox named Clip title. If the field loses its accessible name, this query catches the problem.',
         'const title = screen.getByRole("textbox", { name: "Clip title" });',
         [node('editor', 'ClipEditor', 'kept'), node('field', 'Clip title', 'active', 'textbox')],
         [['editor', 'field']],
       ),
       step(
-        'Perform the interaction',
-        'Await each user-event action. Clearing the old title, typing, and activating Save exercise the same handlers the interface exposes.',
+        'Rename the clip',
+        'Clear Rain, type Drizzle, and click Save. Await each user-event call so one interaction finishes before the next starts. That exercises the same handlers a listener uses to edit and save a clip.',
         'await user.clear(title);\nawait user.type(title, "Drizzle");\nawait user.click(screen.getByRole("button", { name: "Save" }));',
         [
           node('field', 'Clip title', 'active', 'Drizzle'),
@@ -210,8 +211,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Wait for the result',
-        'Use findByRole for UI that appears after the asynchronous save. Assert the result the listener can observe.',
+        'Wait for Drizzle to appear',
+        'The heading changes after the save resolves. Use findByRole to wait for a heading named Drizzle, then check that the listener can see it.',
         'const heading = await screen.findByRole("heading", { name: "Drizzle" });\nexpect(heading).toBeVisible();',
         [
           node('save', 'Save clip', 'kept', 'resolved'),
@@ -220,8 +221,8 @@ export const production: Lesson[] = [
         [['save', 'heading']],
       ),
       step(
-        'Cover the failed save',
-        'In a second test make the save reject. Verify the retry message and the surviving draft. A browser test can separately cover the real service and reload.',
+        'Try an offline save',
+        'In a separate test, make the save promise reject. Check for an error that lets the listener know they can try again, and make sure Drizzle is still in the field. A browser test can cover saving through the real service and reloading.',
         'saveClip.mockRejectedValueOnce(new Error("Offline"));\nawait user.click(screen.getByRole("button", { name: "Save" }));\nexpect(await screen.findByRole("alert")).toHaveTextContent("Could not save");\nexpect(title).toHaveValue("Drizzle");',
         [
           node('save', 'Save clip', 'removed', 'rejected'),
@@ -231,17 +232,18 @@ export const production: Lesson[] = [
         [['save', 'alert']],
       ),
     ],
-    pitfall: 'A fixed timeout slows a fast run and can still fail on a slow run.',
+    pitfall: 'A fixed delay makes a fast save wait and can still finish before a slow save does.',
     practice:
-      'Use getBy for present elements, findBy for expected asynchronous appearances, and queryBy when asserting absence.',
+      'Use getBy when the element should already be there and findBy when you expect it to appear. Use queryBy to check that an element is absent.',
     recap:
-      'Exercise the user’s action and wait for its visible consequence. Put persistence and integration risks in a browser test.',
+      'The rename test waits for the same result the listener sees. To check that the new title survives a reload, run the flow in a browser against the real service.',
     source: 'https://testing-library.com/docs/queries/about/',
     quiz: {
       question: 'Which query waits for a heading that appears after saving?',
       options: ['getByRole', 'queryByRole', 'findByRole'],
       answer: 2,
-      explanation: 'findByRole retries until the matching element appears or the wait times out.',
+      explanation:
+        'findByRole retries the lookup until the heading appears or the query times out.',
     },
   },
   {
@@ -250,11 +252,11 @@ export const production: Lesson[] = [
     title: 'Error boundaries and resilient interfaces',
     mode: 'tree',
     objective:
-      'Keep a clip library usable when its preview is loading, fails to render, or fails during a user action.',
+      'Keep the clip list on screen while a preview loads. Give the listener a way to recover from a failed preview or export.',
     steps: [
       step(
-        'Choose the failure boundary',
-        'A preview failure should leave the clip list available. Wrap the preview subtree in a boundary that owns its fallback.',
+        'Wrap the preview',
+        'Keep ClipList outside PreviewBoundary. If Preview throws while rendering, the boundary can replace the preview and the listener can still choose another clip.',
         '<>\n  <ClipList />\n  <PreviewBoundary key={clip.id}><Preview clip={clip} /></PreviewBoundary>\n</>',
         [
           node('page', 'Library', 'kept'),
@@ -269,8 +271,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Handle a render failure',
-        'A class boundary can derive fallback state when a descendant throws during render. Add componentDidCatch separately if the error should be reported.',
+        'Show a fallback after a render error',
+        'When a descendant throws during render, getDerivedStateFromError sets failed to true and the class boundary renders PreviewError. Add componentDidCatch if you also want to report the error.',
         'class PreviewBoundary extends Component<PropsWithChildren, { failed: boolean }> {\n  state = { failed: false };\n  static getDerivedStateFromError() { return { failed: true }; }\n  render() { return this.state.failed ? <PreviewError /> : this.props.children; }\n}',
         [
           node('preview', 'Preview', 'removed', 'threw'),
@@ -283,8 +285,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Treat waiting separately',
-        'A lazy decoder view can suspend while its module loads. Place Suspense inside the error boundary so waiting and failure get different UI.',
+        'Show a skeleton while the decoder loads',
+        'A lazy DecoderView can suspend while its module loads. Put Suspense inside PreviewBoundary. It can show the skeleton while loading, and the outer boundary can handle a failure.',
         '<PreviewBoundary key={clip.id}>\n  <Suspense fallback={<PreviewSkeleton />}>\n    <DecoderView clip={clip} />\n  </Suspense>\n</PreviewBoundary>',
         [
           node('boundary', 'Boundary', 'kept'),
@@ -297,8 +299,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Catch an event failure',
-        'An error boundary will not ordinarily catch a rejected promise in a click handler. Catch that failure where the export action runs and expose a retry.',
+        'Catch a failed export',
+        'The preview boundary handles render errors. If exportClip rejects in this click handler, catch the rejection here and tell the listener they can try again.',
         'async function handleExport() {\n  try { await exportClip(clip); setMessage(""); }\n  catch { setMessage("Export failed. Try again."); }\n}',
         [
           node('click', 'Export', 'active'),
@@ -311,8 +313,8 @@ export const production: Lesson[] = [
         ],
       ),
       step(
-        'Reset on a new clip',
-        'Selecting another clip changes the boundary key. React mounts a fresh boundary, allowing the new preview to try rendering while the library stays in place.',
+        'Try the next clip',
+        'Selecting another clip changes the boundary’s key. React mounts a fresh boundary and tries to render the new preview. ClipList stays mounted throughout.',
         '<PreviewBoundary key={nextClip.id}>\n  <Preview clip={nextClip} />\n</PreviewBoundary>',
         [
           node('list', 'ClipList', 'kept'),
@@ -324,23 +326,24 @@ export const production: Lesson[] = [
       ),
     ],
     pitfall:
-      'Wrapping the entire application in one boundary can turn a broken optional preview into a blank workspace.',
+      'With a single boundary around the whole app, one broken preview can take the clip list off screen too.',
     practice:
-      'Choose a fallback size users can recover from. Keep useful existing content visible during background updates when possible.',
+      'Put the fallback around the part the listener can recover from. During a background update, keep the last usable content visible when you can.',
     recap:
-      'Use Suspense for supported pending work, boundaries for descendant render failures, and action-level handling for rejected user operations.',
+      'Suspense can show a skeleton while the decoder loads. PreviewBoundary can replace a preview that throws during render. The export handler catches its own failed request.',
     source:
       'https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary',
     quiz: {
-      question: 'Where should an export button handle a rejected request in its click handler?',
+      question:
+        'exportClip rejects after someone clicks Export. Where should this button handle the failure?',
       options: [
-        'In a Suspense fallback',
-        'In the action’s error-handling path',
+        'In the Suspense fallback',
+        'In a catch block in the export handler',
         'Only in getDerivedStateFromError',
       ],
       answer: 1,
       explanation:
-        'A click handler runs outside descendant rendering. It should handle its asynchronous failure and update the UI.',
+        'The export runs in a click handler, outside rendering. Catch the failed request there so the button can show a retry message.',
     },
   },
 ]

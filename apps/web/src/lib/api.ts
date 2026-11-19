@@ -5,8 +5,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok)
     throw new Error(
       response.status === 404
-        ? 'This lesson could not be found.'
-        : 'The field guide could not reach the server.',
+        ? 'We couldn’t find that lesson.'
+        : 'The server couldn’t complete the request.',
     )
   return response.json() as Promise<T>
 }

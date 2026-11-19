@@ -7,7 +7,7 @@ export default function Performance() {
     chart: 0,
     samples: 1,
     rendered: false,
-    why: 'Choose a change and compare the render counts.',
+    why: 'Change the theme, then turn on memo and change it again. Watch the Spectrum counter.',
   })
   function render(samplesChanged: boolean) {
     const renders = samplesChanged || !memo
@@ -17,10 +17,10 @@ export default function Performance() {
       rendered: renders,
       samples: last.samples + Number(samplesChanged),
       why: samplesChanged
-        ? 'New samples change the chart prop, so Spectrum renders.'
+        ? 'Spectrum gets a new samples array, so it renders again.'
         : memo
-          ? 'The sample reference stayed equal. This model skips the chart render.'
-          : 'A parent theme change renders this ordinary child with the same samples.',
+          ? 'Only the theme changed. Spectrum gets the same samples array, so memo skips this render.'
+          : 'The theme change renders Editor again. With memo off, Spectrum renders too, even with the same samples.',
     }))
   }
   return (
@@ -54,7 +54,7 @@ export default function Performance() {
                 chart: 0,
                 samples: 1,
                 rendered: false,
-                why: 'Counters reset for the new comparison.',
+                why: 'Both counters start at zero. Change the theme to see which components render.',
               })
             }}
           >
@@ -66,7 +66,7 @@ export default function Performance() {
       }
       result={
         run.why +
-        ' Counts model updates after mount. Use the React Profiler to measure a real chart.'
+        ' These counts simulate renders after mount. Use the React Profiler to measure rendering time in your app.'
       }
     />
   )

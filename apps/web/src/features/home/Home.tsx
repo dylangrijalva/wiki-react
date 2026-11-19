@@ -18,19 +18,20 @@ import './home.css'
 const guideSteps = [
   {
     Icon: Route,
-    title: 'Pick a question',
-    description: 'Follow a track in order or open the concept you need today.',
+    title: 'Choose a lesson',
+    description: 'Start with rendering, or jump to a topic you already use in your code.',
   },
   {
     Icon: MousePointer2,
-    title: 'Step through it',
-    description: 'Advance the diagram and connect each change to the code that caused it.',
+    title: 'Read the diagram alongside the code',
+    description:
+      'Use the arrow keys to move one step at a time. At the end, try the question to check your understanding.',
   },
   {
     Icon: Bookmark,
     title: 'Pick up where you left off',
     description:
-      'Answer the knowledge check or bookmark a lesson. Your place is saved in this browser.',
+      'Come back in the same browser and your lesson opens at the last step you viewed. You can bookmark a lesson, too.',
   },
 ]
 export default function Home() {
@@ -50,8 +51,8 @@ export default function Home() {
             <em>the hood.</em>
           </h1>
           <p>
-            Explore how React works through animated diagrams, hands-on experiments, and bite-sized
-            lessons.
+            When a counter goes from 0 to 1, which components run again? Step through a render and
+            see what React changes on screen.
           </p>
           <div className="hero-actions">
             <Link className="btn primary" to="/lessons/how-react-renders">
@@ -81,13 +82,7 @@ export default function Home() {
       </section>
       <section className="track-section">
         <div className="section-head">
-          <div>
-            <div className="kicker">
-              <span className="bar" />
-              THE CURRICULUM
-            </div>
-            <h2>Learning tracks</h2>
-          </div>
+          <h2>Learning tracks</h2>
           <Link className="text-link" to="/curriculum">
             View curriculum <ArrowRight size={16} />
           </Link>
@@ -96,7 +91,7 @@ export default function Home() {
           <div className="skeleton" role="status" aria-label="Loading tracks" />
         ) : tracks.isError ? (
           <div className="notice">
-            The curriculum could not load.{' '}
+            We couldn’t load the learning tracks.{' '}
             <button onClick={() => tracks.refetch()}>Try again</button>
           </div>
         ) : (
@@ -134,30 +129,24 @@ export default function Home() {
       </section>
       <section className="feature-section">
         <div className="section-head">
-          <div>
-            <div className="kicker">
-              <span className="bar" />
-              AT THE WORKBENCH
-            </div>
-            <h2>Featured experiments</h2>
-          </div>
+          <h2>Featured experiments</h2>
         </div>
         <div className="featured-grid">
           {[
             [
               'lists-and-keys',
-              'Reorder a component tree',
-              'Follow a key as its list item changes position.',
+              'Reorder a clip list',
+              'Swap two clips. Does the draft move with the clip you were editing?',
             ],
             [
               'effect-lifecycle',
-              'Trace an effect',
-              'See when a connection opens and when it closes.',
+              'Switch radio stations',
+              'Watch the old stream disconnect before the new one opens.',
             ],
             [
               'fetching-and-caching',
-              'Inspect the cache',
-              'Watch cached data meet a background request.',
+              'Open a cached collection',
+              'See which clips stay on screen while a fresh copy loads.',
             ],
           ].map(([slug, title, desc]) => (
             <Link key={slug} to={'/lessons/' + slug}>
@@ -172,11 +161,7 @@ export default function Home() {
         </div>
       </section>
       <section className="how">
-        <div className="kicker">
-          <span className="bar" />
-          HOW TO USE THIS GUIDE
-        </div>
-        <h2 className="serif">Learn one change at a time.</h2>
+        <h2 className="serif">How to use this guide</h2>
         <div>
           {guideSteps.map(({ Icon, title, description }) => (
             <article key={title}>

@@ -11,13 +11,13 @@ export const effects: Lesson[] = [
     steps: [
       step(
         'Render the station',
-        'Radio reads stationId while rendering. Opening a stream here would leak work if React abandons this render.',
+        'Radio reads stationId to render the heading. If it opened the stream during render, a render that React later discarded could leave that stream open.',
         'function Radio({ stationId }: { stationId: string }) {\n  useStation(stationId);\n  return <h2>{stationId}</h2>;\n}',
         [node('radio', 'Radio', 'active', 'FM 88'), node('stream', 'Stream', 'idle', 'closed')],
       ),
       step(
         'Run setup after commit',
-        'After the committed mount, the Effect creates a connection for FM 88. The returned function holds this exact connection for cleanup.',
+        'Once React commits Radio to the screen, the Effect connects to FM 88. Its cleanup function remembers the stream that this setup opened.',
         'useEffect(() => {\n  const stream = connect(stationId);\n  return () => stream.close();\n}, [stationId]);',
         [
           node('commit', 'Commit', 'kept', 'FM 88'),
@@ -30,8 +30,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Keep an unchanged connection',
-        'Changing the volume can render Radio again. If stationId compares equal using Object.is, React can leave this Effect running.',
+        'Turn up the volume',
+        'A volume change can render Radio again with stationId still set to FM 88. React compares that dependency with Object.is, so this render leaves the connection open.',
         '<Radio stationId="FM 88" />',
         [
           node('render', 'Render', 'active', 'same station'),
@@ -39,15 +39,15 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Clean up the old station',
-        'The listener selects FM 92. After that update commits, React runs the previous cleanup with the old station’s connection.',
+        'Disconnect FM 88',
+        'Switch to FM 92. After React commits the change, it calls the previous cleanup, which still has the FM 88 stream and closes it.',
         '// Cleanup captured by the FM 88 setup\nreturn () => stream.close();',
         [node('commit', 'Commit', 'active', 'FM 92'), node('old', 'FM 88', 'removed', 'closed')],
         [['commit', 'old']],
       ),
       step(
-        'Start the new station',
-        'Once the old setup has been undone, React runs setup with FM 92. Exactly one stream should remain active.',
+        'Connect to FM 92',
+        'With FM 88 disconnected, the new setup opens FM 92. The player should now have just one stream open.',
         'const stream = connect(stationId); // FM 92',
         [
           node('old', 'FM 88', 'removed', 'closed'),
@@ -58,25 +58,26 @@ export const effects: Lesson[] = [
       ),
       step(
         'Unmount the player',
-        'Removing Radio runs its last cleanup. In development Strict Mode, an extra setup and cleanup cycle can also exercise this pairing on mount.',
+        'When you remove Radio, its last cleanup closes FM 92. In development, Strict Mode can also run an extra setup and cleanup on mount to check that the two match.',
         '{showRadio && <Radio stationId={stationId} />}',
         [node('radio', 'Radio', 'removed', 'unmounted'), node('new', 'FM 92', 'removed', 'closed')],
         [['radio', 'new']],
       ),
     ],
     pitfall:
-      'Omitting stationId from the dependencies can keep the stream attached to an old station.',
+      'Leave stationId out of the dependency array and the player can keep streaming FM 88 while the heading says FM 92.',
     practice:
-      'Keep resource creation and disposal together. Include every reactive value read by setup or cleanup.',
+      'Open the stream and return the cleanup that closes it in the same Effect. List every reactive value the setup or cleanup reads as a dependency.',
     recap:
-      'Each setup owns one subscription. A dependency change ends the old subscription before the new one starts.',
+      'Each setup starts one subscription. When the station changes, React closes the old stream before opening the next. Removing the player closes its last stream.',
     source: 'https://react.dev/reference/react/useEffect',
     quiz: {
-      question: 'After a committed station change, which runs first?',
+      question:
+        'React has committed the switch from FM 88 to FM 92. Which Effect function runs first?',
       options: ['Setup for FM 92', 'Cleanup for FM 88', 'Both setups at once'],
       answer: 1,
       explanation:
-        'React invokes the previous cleanup before setting up the replacement connection.',
+        'Cleanup still has the connection from the FM 88 setup. React lets it close that stream before starting FM 92.',
     },
   },
   {
@@ -85,11 +86,11 @@ export const effects: Lesson[] = [
     title: 'Avoiding unnecessary Effects',
     mode: 'compare',
     objective:
-      'Decide where to calculate a filtered list, submit a purchase, and synchronize an outside system.',
+      'Decide which parts of a clip library need an Effect, from filtering titles to changing the player volume.',
     steps: [
       step(
-        'Find the extra pass',
-        'An Effect stores matching clips after render. On a query change, the first render can still contain the previous matches, followed by a second update.',
+        'Search for a clip',
+        'Type a new query. On the first render, matches can still hold results for the previous search. The Effect then calls setMatches and triggers another update.',
         'useEffect(() => {\n  setMatches(clips.filter(c => c.title.includes(query)));\n}, [clips, query]);',
         [
           node('query', 'Query', 'active', 'wind'),
@@ -102,8 +103,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Calculate the list inline',
-        'Filtering is a pure function of two current inputs. Calculate the array while rendering and the view immediately describes the new query.',
+        'Filter during render',
+        'The list depends only on clips and query. Filtering during render uses the latest values of both, so this render already has the right results.',
         'const matches = clips.filter(c => c.title.includes(query));',
         [
           node('query', 'Query', 'kept', 'wind'),
@@ -116,15 +117,15 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Handle the purchase event',
-        'A purchase follows a particular click. The click handler knows which license the customer chose and runs only in response to that action.',
+        'Buy the selected license',
+        'Clicking Buy tells you exactly when to submit the purchase and which license the customer selected. The click handler has both pieces of information.',
         'async function handleBuy() {\n  await purchaseLicense(selectedId);\n}',
         [node('click', 'Buy click', 'active'), node('order', 'Purchase', 'added', 'one request')],
         [['click', 'order']],
       ),
       step(
-        'Keep external synchronization',
-        'The player’s volume also controls an external audio element. An Effect can synchronize that element whenever the current volume changes.',
+        'Set the audio volume',
+        'The audio element has a volume property of its own. An Effect can copy the current volume into that property whenever the React value changes.',
         'useEffect(() => {\n  if (audioRef.current) audioRef.current.volume = volume;\n}, [volume]);',
         [
           node('volume', 'Volume', 'active', '0.6'),
@@ -137,32 +138,33 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Reset on a new identity',
-        'Switching clips starts a fresh trim editor. Give the editor a clip key to reset all its local draft state together.',
+        'Switch clips in the trim editor',
+        'Give TrimEditor the clip ID as its key. Choosing a different clip mounts a fresh editor and resets its local draft, including the trim points.',
         '<TrimEditor key={clip.id} clip={clip} />',
         [
-          node('old', 'Old editor', 'removed', 'draft 2–8s'),
+          node('old', 'Old editor', 'removed', 'draft 2 to 8s'),
           node('new', 'New editor', 'added', 'initial draft'),
         ],
       ),
     ],
     pitfall:
-      'Watching a purchased flag in an Effect makes an action depend on render history instead of the click that triggered it.',
+      'A purchased flag stays in state after the click. An Effect that watches it can submit a purchase when the component mounts with that flag already set.',
     practice:
-      'Ask what caused the work. Display calculations, user events, and external synchronization each have a different owner.',
+      'For a new feature, identify the cause first. A purchase has a particular click behind it. The audio volume needs to stay in sync however the React value changes.',
     recap:
-      'Calculate during render, handle actions in event handlers, and reserve Effects for synchronization.',
+      'Filtering belongs in render, and buying a license belongs in the click handler. The volume Effect keeps an external audio element in sync with React.',
     source: 'https://react.dev/learn/you-might-not-need-an-effect',
     quiz: {
       question:
-        'A filter changes as the user types. Where should its inexpensive match count be computed?',
+        'As you type, the library shows how many clips match. Where should it get that count?',
       options: [
         'In an Effect with setCount',
         'During render from the filtered list',
         'In a second server request',
       ],
       answer: 1,
-      explanation: 'The count already follows from the current filtered list.',
+      explanation:
+        'The render already has the filtered clips. Its array length gives the count for this search.',
     },
   },
   {
@@ -171,11 +173,11 @@ export const effects: Lesson[] = [
     title: 'Custom hooks and reusable logic',
     mode: 'layers',
     objective:
-      'Extract a shared keyboard subscription while keeping each component’s local state independent.',
+      'Write the Shift-key listener once and let both the mixer and the trim editor use it independently.',
     steps: [
       step(
-        'Identify repeated behavior',
-        'Both a mixer and an editor need to know whether Shift is held. Each would otherwise define matching keydown and keyup subscriptions.',
+        'Watch the Shift key',
+        'Both the mixer and the editor need to know whether Shift is down. Writing the keydown and keyup handlers in each component would duplicate the same work.',
         'function Mixer() {\n  const [shift, setShift] = useState(false);\n  // Subscribe to key events.\n}',
         [
           node('mixer', 'Mixer', 'active', 'key events'),
@@ -183,15 +185,15 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Extract the stateful logic',
-        'Give the behavior a hook name and return its boolean snapshot. Calling the hook at the top level keeps Hook order stable.',
+        'Write useShiftHeld',
+        'Give the hook a name that starts with use and return a boolean for the current key state. Call the hook at the top level so its order stays the same on every render.',
         'function useShiftHeld() {\n  const [held, setHeld] = useState(false);\n  // Install the subscription below.\n  return held;\n}',
         [node('hook', 'useShiftHeld', 'added'), node('held', 'held', 'kept', 'false')],
         [['hook', 'held']],
       ),
       step(
-        'Subscribe and unsubscribe',
-        'Register a paired listener for keydown and keyup. A blur handler clears held when the window loses focus before keyup arrives.',
+        'Listen for keyup and blur',
+        'Use the same listener for keydown and keyup. If the user switches windows before releasing Shift, blur clears held. Cleanup aborts the listeners registered by this Effect.',
         'useEffect(() => {\n  const key = (e: KeyboardEvent) => setHeld(e.shiftKey);\n  const reset = () => setHeld(false);\n  const controller = new AbortController();\n  const options = { signal: controller.signal };\n  window.addEventListener("keydown", key, options);\n  window.addEventListener("keyup", key, options);\n  window.addEventListener("blur", reset, options);\n  return () => controller.abort();\n}, []);',
         [
           node('window', 'Window', 'active'),
@@ -204,8 +206,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Call the hook twice',
-        'Mixer and Editor reuse the same logic. Each call gets independent state and its own subscription. Each listener responds to the next relevant browser event.',
+        'Use Shift in two places',
+        'Mixer and Editor each call useShiftHeld. They listen to the same browser events, but each call has its own subscription and state. In Editor, holding Shift reduces the trim step to 0.01.',
         'function Editor() {\n  const precise = useShiftHeld();\n  return <TrimControl step={precise ? 0.01 : 1} />;\n}',
         [
           node('window', 'Window', 'kept'),
@@ -218,8 +220,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Remove a subscriber',
-        'Closing Editor aborts its listeners. Mixer remains mounted, and its own listeners keep receiving keyboard events.',
+        'Close the editor',
+        'Closing Editor removes its listeners. Mixer stays mounted and continues to receive key events through its own subscription.',
         '<>\n  {editing && <Editor />}\n  <Mixer />\n</>',
         [
           node('window', 'Window', 'kept'),
@@ -232,15 +234,20 @@ export const effects: Lesson[] = [
     pitfall:
       'Calling useShiftHeld only inside an if statement can change Hook order between renders.',
     practice:
-      'Extract a hook around a specific behavior. If consumers need one shared value and subscription, place one call in a common owner.',
+      'Give a custom hook one recognizable job, such as tracking Shift. If both components need one subscription and one value, call the hook once in their shared parent.',
     recap:
-      'A custom hook shares stateful logic. Each call retains the state and cleanup of its own component instance.',
+      'Mixer and Editor share the hook’s implementation. Each mounted component keeps its own key state and cleans up its own listeners.',
     source: 'https://react.dev/learn/reusing-logic-with-custom-hooks',
     quiz: {
-      question: 'Two mounted components call useShiftHeld. How many state cells do they share?',
-      options: ['One global cell', 'One per key event', 'None. Each call owns its state.'],
+      question: 'Mixer and Editor both call useShiftHeld. Which state do the two calls share?',
+      options: [
+        'One global Shift value',
+        'One state value per browser event',
+        'None. Each call keeps its own state.',
+      ],
       answer: 2,
-      explanation: 'Hook calls belong to their individual positions in the mounted component tree.',
+      explanation:
+        'React associates each Hook call with its position in the component tree. Closing Editor leaves the Mixer call and its state in place.',
     },
   },
   {
@@ -252,15 +259,15 @@ export const effects: Lesson[] = [
       'Trace a clip collection through a cold request, a fresh cache hit, and a background refresh.',
     steps: [
       step(
-        'Identify the resource',
-        'Put every input that changes the collection result in the query key. Two views of the same collection can then observe the same cache entry.',
+        'Key the query by collection',
+        'Include collectionId in the query key, along with any other input that changes which clips come back. Two library views requesting the same collection can then share its cache entry.',
         'const queryKey = ["clips", collectionId] as const;',
         [node('view', 'Library', 'active'), node('cache', 'Query key', 'added', 'clips / field')],
         [['view', 'cache']],
       ),
       step(
-        'Handle the cold request',
-        'An enabled query with no cached data starts pending while its request runs. Check the HTTP status because fetch resolves even for HTTP errors.',
+        'Request an uncached collection',
+        'With this query enabled and the cache empty, the library is pending while it waits for the server. Even a 404 can resolve fetch, so check res.ok before reading the clips.',
         'const clips = useQuery({ queryKey, staleTime: 60_000,\n  queryFn: async ({ signal }) => {\n    const res = await fetch("/api/clips/" + encodeURIComponent(collectionId), { signal });\n    if (!res.ok) throw new Error("Could not load clips");\n    return parseClips(await res.json());\n  } });',
         [
           node('view', 'Library', 'active', 'pending'),
@@ -273,8 +280,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Read a successful response',
-        'A resolved array becomes the cached data. The observer receives it and renders the rows. The configured staleTime starts from the successful update.',
+        'Cache the returned clips',
+        'The query caches the three clips from the response. The library receives that array and renders the rows. The one-minute staleTime starts with this successful update.',
         'if (clips.data) return <Rows clips={clips.data} />;',
         [
           node('api', 'Server', 'kept', '200'),
@@ -287,8 +294,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Revisit a fresh entry',
-        'A second library view subscribes to the same key within one minute of the successful fetch. With the default refetch-on-mount behavior and no invalidation, it can read the cache without another request.',
+        'Open the collection again',
+        'Open a second view of the same collection within a minute. The data is still fresh unless something invalidated it. With the default mount behavior, the new view can show the clips without fetching again.',
         'useQuery({ queryKey, queryFn: loadClips, staleTime: 60_000 });',
         [
           node('view', 'Library', 'active', 'mount'),
@@ -298,8 +305,8 @@ export const effects: Lesson[] = [
         [['cache', 'view']],
       ),
       step(
-        'Refresh a stale entry',
-        'Mount the observer after the freshness window expires, while the entry still exists. Cached rows can stay visible while a background fetch checks for changes.',
+        'Reopen after a minute',
+        'Open the collection after the minute has passed, while the clips are still in the cache. The library can show those rows right away and fetch updates in the background.',
         '{clips.isFetching && <small>Refreshing…</small>}',
         [
           node('view', 'Library', 'kept', '3 clips'),
@@ -312,8 +319,8 @@ export const effects: Lesson[] = [
         ],
       ),
       step(
-        'Recover from failure',
-        'After retries are exhausted, an initial error needs a retry path. A failed background refresh may still have usable old data, so preserve the rows and show a refresh warning.',
+        'Handle a failed request',
+        'If the first request runs out of retries, offer a retry button. If a later refresh fails, keep the last good rows visible and tell the reader the refresh failed.',
         'if (clips.isError && clips.data === undefined) {\n  return <button onClick={() => clips.refetch()}>Retry</button>;\n}',
         [
           node('api', 'Server', 'removed', 'failed'),
@@ -326,20 +333,21 @@ export const effects: Lesson[] = [
     pitfall:
       'A fixed key such as ["clips"] can show data for the wrong collection after the route changes.',
     practice:
-      'Choose staleTime according to how long users can rely on cached values. A shorter window enables earlier refetches and more traffic.',
+      'Set staleTime to how long the clip list can reasonably stay fresh. A shorter window allows earlier refetches, which can mean more requests.',
     recap:
-      'The key groups observers around one resource. Freshness influences refetching, and cached data can outlive an observer.',
+      'The collection ID gives each clip list its own cache entry. That entry can still be there when you reopen the library. Its freshness helps determine whether mounting the view triggers a fetch.',
     source: 'https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults',
     quiz: {
-      question: 'What can a stale cached query display during a background request?',
+      question:
+        'The library has three cached clips and starts a background refresh. What can it show while it waits?',
       options: [
-        'Only a blank loading screen',
-        'Its previous successful data',
-        'A guaranteed fresh response',
+        'Only a loading screen',
+        'The clips from the last successful request',
+        'A guaranteed fresh list',
       ],
       answer: 1,
       explanation:
-        'Data and fetch activity are separate. An observer can show cached rows while a request is in flight.',
+        'The cached array is still available while isFetching is true. The library can keep all three rows on screen until it receives an update.',
     },
   },
 ]

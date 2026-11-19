@@ -63,14 +63,13 @@ export default function Curriculum() {
   return (
     <div className="wrap catalog-page">
       <div className="page-title">
-        <div className="kicker">
-          <span className="bar" />
-          FIELD GUIDE / CURRICULUM
-        </div>
         <h1 className="serif">
           The curriculum<span>.</span>
         </h1>
-        <p>Choose a track or find the React concept you want to explore.</p>
+        <p>
+          New to React? Start with React Fundamentals. Each track has four lessons you can take in
+          order or on their own.
+        </p>
       </div>
       <div className="filters">
         <label className="search-field">
@@ -112,7 +111,7 @@ export default function Curriculum() {
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="all">All progress</option>
+          <option value="all">Any status</option>
           <option value="new">Not started</option>
           <option value="started">In progress</option>
           <option value="complete">Completed</option>
@@ -120,7 +119,7 @@ export default function Curriculum() {
       </div>
       {queries.some((q) => q.isError) ? (
         <div className="notice">
-          The curriculum could not load.{' '}
+          We couldn’t load the curriculum.{' '}
           <button onClick={() => queries.forEach((q) => void q.refetch())}>Try again</button>
         </div>
       ) : queries.some((q) => q.isPending) ? (
@@ -202,7 +201,7 @@ export default function Curriculum() {
         <div className="empty">
           <BookOpen />
           <h2>No matching lessons</h2>
-          <p>Try another subject or clear your filters.</p>
+          <p>Try a different search or clear the filters to see every lesson.</p>
           <button className="btn" onClick={reset}>
             Clear filters
           </button>

@@ -47,13 +47,13 @@ export default function Shell() {
   }, [open, close, search])
   useEffect(() => {
     window.scrollTo(0, 0)
-    const page =
-      pages.find(([to]) => to === pathname)?.[1] ??
-      (pathname.startsWith('/lessons/') ? pathname.slice(9).replaceAll('-', ' ') : 'Page not found')
-    document.title =
-      pathname === '/'
-        ? 'React, Rendered · An interactive field guide'
-        : page.charAt(0).toUpperCase() + page.slice(1) + ' · React, Rendered'
+    if (!pathname.startsWith('/lessons/')) {
+      const page = pages.find(([to]) => to === pathname)?.[1] ?? 'Page not found'
+      document.title =
+        pathname === '/'
+          ? 'React, Rendered · An interactive field guide'
+          : page + ' · React, Rendered'
+    }
     if (lastPath.current !== pathname) {
       document.getElementById('main')?.focus({ preventScroll: true })
       lastPath.current = pathname
@@ -98,7 +98,7 @@ export default function Shell() {
             <button
               className="mobile-menu icon-btn"
               aria-expanded={menu}
-              aria-label="Toggle navigation"
+              aria-label={menu ? 'Close navigation' : 'Open navigation'}
               onClick={() => setMenu(!menu)}
             >
               {menu ? <X size={18} /> : <Menu size={18} />}

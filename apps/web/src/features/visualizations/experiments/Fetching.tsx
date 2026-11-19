@@ -11,20 +11,20 @@ export default function Fetching() {
     if (phase !== 'fresh') setPhase(cached ? 'refreshing' : 'pending')
   }
   const result: Record<RequestState, string> = {
-    idle: 'The library has no data for this key. Open the collection to request it.',
-    pending: 'The first request is in flight. The list shows its loading state.',
+    idle: 'The cache is empty for this collection. Open it to fetch the clips.',
+    pending: 'The list shows a loading indicator while it waits for the first response.',
     fresh: hit
-      ? 'Another observer reads fresh cached data without starting a request.'
-      : 'The response populated the cache. The list can display the clips.',
-    refreshing: 'The list keeps its cached clips while the new request runs.',
-    error: 'The first request failed. No cached list exists yet. Open the collection to retry.',
-    stale: 'The freshness window elapsed. A new observer can trigger a background refetch.',
+      ? 'Opening the collection again reads fresh clips from the cache. The server gets no new request.'
+      : 'The server returned the clips. The list reads them from the cache.',
+    refreshing: 'The cached clips stay on screen while the library fetches an update.',
+    error: 'The first request failed, so the cache is still empty. Reopen the collection to retry.',
+    stale: 'The cached clips are now stale. Reopen the collection to trigger a background refetch.',
     refreshError:
-      'Refresh failed. The earlier data is still available, and the UI can report the refresh error.',
+      'The refresh failed. The list can show the error and keep the cached clips on screen.',
   }
   return (
     <Lab
-      title="Follow a collection query"
+      title="Fetch a clip collection"
       mode="flow"
       scene={{
         nodes: [
@@ -90,7 +90,7 @@ export default function Fetching() {
                 setHit(false)
               }}
             >
-              Expire freshness
+              Mark cache stale
             </button>
           )}
         </>

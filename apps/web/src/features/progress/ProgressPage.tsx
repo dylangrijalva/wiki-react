@@ -42,7 +42,7 @@ export default function ProgressPage() {
   if (queries.some((q) => q.isError))
     return (
       <div className="wrap notice">
-        Progress is unavailable.{' '}
+        We couldn’t load your progress.{' '}
         <button onClick={() => queries.forEach((q) => void q.refetch())}>Try again</button>
       </div>
     )
@@ -66,14 +66,10 @@ export default function ProgressPage() {
   return (
     <div className="wrap progress-page">
       <div className="page-title">
-        <div className="kicker">
-          <span className="bar" />
-          YOUR FIELD NOTES
-        </div>
         <h1 className="serif">
           My progress<span>.</span>
         </h1>
-        <p>Your lessons, bookmarks, and next steps.</p>
+        <p>Reopen a lesson in this browser to return to the step where you left off.</p>
       </div>
       <div className="progress-cards">
         <article>
@@ -116,18 +112,22 @@ export default function ProgressPage() {
         <ReadingList
           title="Recently visited"
           rows={recent}
-          empty="Open a lesson and it will appear here."
+          empty="You haven’t opened a lesson yet."
         />
         <ReadingList
           title="Bookmarks"
           rows={marks.data.flatMap((id) => bySlug.get(id) ?? [])}
-          empty="Save a lesson with the bookmark button in its player."
+          empty="Choose “Save lesson” in a lesson you want to revisit."
         />
       </div>
       <section className="reading-list">
         <h2>Tracks in progress</h2>
         {!active.length ? (
-          <p>Tracks appear here while you work through their lessons.</p>
+          <p>
+            {completed.size === lessons.length
+              ? 'You’ve finished every track.'
+              : 'Open a lesson to start a track.'}
+          </p>
         ) : (
           active.map(({ t, all }) => (
             <Link className="active-track" to={'/curriculum?track=' + t.id} key={t.id}>

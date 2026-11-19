@@ -79,7 +79,7 @@ export function SceneDiagram({
           {scene.edges
             .map(([a, b]) => {
               const nodeLabel = (id: string) => scene.nodes.find((n) => n.id === id)?.label
-              return `${nodeLabel(a)} connects to ${nodeLabel(b)}.`
+              return `${nodeLabel(a)} points to ${nodeLabel(b)}.`
             })
             .join(' ')}
         </desc>

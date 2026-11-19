@@ -7,11 +7,11 @@ export const fundamentals: Lesson[] = [
     trackId: 'fundamentals',
     title: 'How React renders',
     mode: 'tree',
-    objective: 'Follow a play-count update from a button press to a single changed text node.',
+    objective: 'Follow one click from the play counter to the text that changes on screen.',
     steps: [
       step(
-        'Meet the component tree',
-        'A player has a title and a play counter. React calls Player to discover which children belong in the tree. Each component describes its part of the screen.',
+        'The player and its children',
+        'React calls Player and reads the JSX it returns. Title supplies the heading, and PlayCount supplies the button. Both sit under Player in the component tree.',
         'function Player() {\n  return <section><Title /><PlayCount /></section>;\n}',
         [node('player', 'Player', 'active'), node('title', 'Title'), node('count', 'PlayCount')],
         [
@@ -21,7 +21,7 @@ export const fundamentals: Lesson[] = [
       ),
       step(
         'Trigger an update',
-        'The counter owns its play count. Clicking its button queues a state update. The event handler still sees the count from the render that created it.',
+        'PlayCount keeps its own count. Click the button and setPlays queues an increment. For the rest of this handler, plays still has the value from the render that created it.',
         'const [plays, setPlays] = useState(0);\nconst recordPlay = () => setPlays(n => n + 1);',
         [
           node('player', 'Player'),
@@ -34,8 +34,8 @@ export const fundamentals: Lesson[] = [
         ],
       ),
       step(
-        'Call the component',
-        'React calls PlayCount with the updated state. Its return value now describes a button showing one play. Rendering computes this description before React changes the DOM.',
+        'Render the next count',
+        'React calls PlayCount again, this time with plays equal to 1. The JSX describes "Plays: 1" while the button on screen still says "Plays: 0".',
         'return <button onClick={recordPlay}>\n  Plays: {plays}\n</button>;',
         [
           node('count', 'PlayCount', 'active', 'plays = 1'),
@@ -46,7 +46,7 @@ export const fundamentals: Lesson[] = [
       ),
       step(
         'Commit the difference',
-        'The button still has the same type and position. React can keep that DOM element and change the text inside it. The title needs no DOM edit.',
+        'At the same position in the tree, React finds another button. It keeps the DOM element and changes the count inside it. The title stays put.',
         '// After the commit\n// <button>Plays: 1</button>',
         [
           node('result', 'Button', 'kept'),
@@ -57,7 +57,7 @@ export const fundamentals: Lesson[] = [
       ),
       step(
         'Let the browser paint',
-        'The browser can now paint the updated count. A later render that produces the same output may require no DOM changes at all.',
+        'After the commit, the browser can paint the new count. If a later render returns identical output, React can leave the DOM alone.',
         '<Title />\n// Same title before and after the click',
         [
           node('player', 'Player', 'kept'),
@@ -71,19 +71,19 @@ export const fundamentals: Lesson[] = [
       ),
     ],
     pitfall:
-      'A console log in a component counts function calls. It cannot tell you how many DOM nodes changed.',
+      'A log inside PlayCount tells you how often React called the function. An extra line in the console can appear even when the DOM stays the same.',
     practice:
-      'Keep render calculations pure. Put the play-count update in the click handler so React can safely call the component again.',
+      'Increment the count in the click handler. Keep the render itself pure so React can call PlayCount again without recording an extra play.',
     recap:
-      'A state update triggers a render. React computes the next output, commits the necessary DOM edits, and the browser paints.',
+      'The click queues an increment. During render, React works out what the button should say. During commit, it updates the text so the browser can paint it.',
     source: 'https://react.dev/learn/render-and-commit',
     quiz: {
       question:
-        'PlayCount renders again and returns the same button text. What DOM edit is required?',
+        'PlayCount renders again with exactly the same output. What needs to change in the DOM?',
       options: ['Replace the button', 'Update the title', 'None if the output is unchanged'],
       answer: 2,
       explanation:
-        'Rendering computes output. React can keep the existing DOM when the output still matches.',
+        'The existing button already shows the right text, so React can keep it as it is.',
     },
   },
   {
@@ -94,21 +94,21 @@ export const fundamentals: Lesson[] = [
     objective: 'Trace a clip title through a typed prop into a heading.',
     steps: [
       step(
-        'Describe the input',
-        'ClipLabel takes a title. A TypeScript prop type lets a caller see exactly which value it must supply.',
+        'Give the title a type',
+        'ClipLabel expects a string called title. TypeScript can flag a missing title or a value of the wrong type at the call site.',
         'type LabelProps = { title: string };',
         [node('type', 'LabelProps', 'active', 'title: string')],
       ),
       step(
         'Pass a value in JSX',
-        'The parent uses braces to evaluate an expression. The resulting value becomes the title prop for this particular label.',
+        'The braces tell JSX to evaluate clip.title. For this clip, the value that reaches ClipLabel is "Rain".',
         'const clip = { title: "Rain" };\n<ClipLabel title={clip.title} />',
         [node('parent', 'Clip', 'active', 'Rain'), node('type', 'title', 'added', 'Rain')],
         [['parent', 'type']],
       ),
       step(
-        'Read a snapshot',
-        'React hands the component a props object. Destructuring gives the function a local name for its current title.',
+        'Read the title prop',
+        'ClipLabel receives a props object. It pulls out title in the function parameter and uses that value as the heading text.',
         'function ClipLabel({ title }: LabelProps) {\n  return <h3>{title}</h3>;\n}',
         [
           node('type', 'title', 'kept', 'Rain'),
@@ -121,8 +121,8 @@ export const fundamentals: Lesson[] = [
         ],
       ),
       step(
-        'Render a second instance',
-        'The same component definition can appear twice. Each instance receives its own props, so the two headings can show different text.',
+        'Label another clip',
+        'The library uses ClipLabel twice. The first instance receives "Rain" and the second receives "Wind", so each heading shows the title its caller supplied.',
         '<><ClipLabel title="Rain" />\n  <ClipLabel title="Wind" /></>',
         [
           node('parent', 'Library', 'active'),
@@ -135,8 +135,8 @@ export const fundamentals: Lesson[] = [
         ],
       ),
       step(
-        'Change the source',
-        'When the parent supplies a new title, the corresponding label renders with the new value. Mutating the old props object would violate the component contract.',
+        'Rename the second clip',
+        'The parent passes "Wind at dusk" on the next render. ClipLabel reads the new title from its props and leaves the previous props object alone.',
         '<ClipLabel title="Wind at dusk" />',
         [
           node('parent', 'Library', 'active'),
@@ -151,15 +151,16 @@ export const fundamentals: Lesson[] = [
     ],
     pitfall: 'Writing title="clip.title" passes the literal text clip.title.',
     practice:
-      'Use a prop for a value controlled by the caller. Use a default parameter for genuinely optional input.',
+      'Let the caller supply a title when it knows the clip name. Give a prop a default parameter only if leaving it out makes sense.',
     recap:
-      'JSX describes an element. React passes its props to the component, which returns the next part of the tree.',
+      'The parent describes a ClipLabel element in JSX. React passes its props to ClipLabel, whose returned heading becomes part of the tree.',
     source: 'https://react.dev/learn/passing-props-to-a-component',
     quiz: {
-      question: 'Which expression passes the current title value?',
+      question: 'Which JSX attribute passes the title stored on the clip?',
       options: ['title="clip.title"', 'title={clip.title}', 'clip.title="title"'],
       answer: 1,
-      explanation: 'Braces evaluate clip.title in the parent’s JavaScript scope.',
+      explanation:
+        'Inside braces, clip.title reads the property in the parent’s scope. Here it evaluates to "Rain".',
     },
   },
   {
@@ -172,20 +173,20 @@ export const fundamentals: Lesson[] = [
     steps: [
       step(
         'Define the frame',
-        'A frame supplies the border and spacing. Its children prop accepts the content the caller places between its tags.',
+        'Frame supplies the border and spacing. Whatever the caller nests inside its tags arrives as children.',
         'function Frame({ children }: { children: React.ReactNode }) {\n  return <section className="frame">{children}</section>;\n}',
         [node('frame', 'Frame', 'active', 'border + space')],
       ),
       step(
-        'Fill the opening',
-        'The caller inserts a waveform. Frame places that element inside its section without needing access to the audio samples.',
+        'Add a waveform',
+        'The caller gives the samples directly to Waveform. Frame receives the resulting element as a child and places it inside its section.',
         '<Frame>\n  <Waveform samples={samples} />\n</Frame>',
         [node('frame', 'Frame', 'kept'), node('wave', 'Waveform', 'added', 'samples')],
         [['frame', 'wave']],
       ),
       step(
-        'Compose siblings',
-        'Add transport controls next to the waveform. The element order in children controls the order inside the section.',
+        'Add playback controls',
+        'Put Transport after Waveform between the Frame tags. That puts the controls after the waveform in the section.',
         '<Frame>\n  <Waveform samples={samples} />\n  <Transport onPlay={play} />\n</Frame>',
         [
           node('frame', 'Frame', 'kept'),
@@ -198,8 +199,8 @@ export const fundamentals: Lesson[] = [
         ],
       ),
       step(
-        'Name the composition',
-        'ClipPreview can own the audio-specific arrangement. A frame change and a transport change now have different homes.',
+        'Build ClipPreview',
+        'ClipPreview picks the samples for Waveform and wires up playback for Transport. Changing the border still takes a single edit to Frame.',
         'function ClipPreview({ clip }: { clip: Clip }) {\n  return <Frame><Waveform samples={clip.samples} />\n    <Transport onPlay={() => playClip(clip)} /></Frame>;\n}',
         [
           node('preview', 'ClipPreview', 'added'),
@@ -215,7 +216,7 @@ export const fundamentals: Lesson[] = [
       ),
       step(
         'Reuse the frame',
-        'An empty library can use the same frame with entirely different children. Frame needs no mode switch to support this new use.',
+        'An empty library puts a paragraph inside the same frame. Frame can render the message as children without a special setting for empty libraries.',
         '<Frame><p>Record your first clip.</p></Frame>',
         [
           node('empty', 'EmptyLibrary', 'added'),
@@ -228,16 +229,19 @@ export const fundamentals: Lesson[] = [
         ],
       ),
     ],
-    pitfall: 'A new boolean prop for every possible child forces Frame to know each feature.',
+    pitfall:
+      'If Frame needs a flag for every kind of child, adding an empty-state message means editing the frame itself.',
     practice:
-      'Use children for a single flexible opening. Named props such as footer help when callers must place content in specific regions.',
-    recap: 'The caller chooses the contents. The wrapper chooses where those contents appear.',
+      'Use children when the caller can fill one area freely. Give the wrapper a named prop such as footer when a piece of content belongs in a particular spot.',
+    recap:
+      'ClipPreview chooses the waveform and transport controls. Frame decides where they appear inside its section.',
     source: 'https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children',
     quiz: {
-      question: 'Which component needs the waveform samples?',
+      question: 'Which component needs the audio samples to draw the preview?',
       options: ['Frame', 'Waveform', 'Every ancestor'],
       answer: 1,
-      explanation: 'The caller can pass samples straight to Waveform while Frame handles layout.',
+      explanation:
+        'Waveform draws the audio. Frame can arrange its children without inspecting the samples.',
     },
   },
   {
@@ -245,23 +249,23 @@ export const fundamentals: Lesson[] = [
     trackId: 'fundamentals',
     title: 'Lists, keys, and reconciliation',
     mode: 'compare',
-    objective: 'Predict which editable clip rows keep their local drafts after a reorder.',
+    objective: 'Sort two clip rows and predict what happens to an unfinished rename.',
     steps: [
       step(
-        'Give rows an identity',
-        'Each clip has a durable ID. A key lets React match a row among siblings across renders. The row can keep its draft while its order changes.',
+        'Use the clip ID as its key',
+        'Rain has ID r and Wind has ID w. React can use those keys to match sibling rows on the next render, even if a row moves with a draft still open.',
         'clips.map(clip => <ClipRow key={clip.id} clip={clip} />)',
         [node('rain', 'Rain', 'kept', 'id: r'), node('wind', 'Wind', 'kept', 'id: w')],
       ),
       step(
-        'Edit a draft',
-        'Typing edits the Wind row’s local state. Its draft belongs to this row identity while that component stays in the tree.',
+        'Rename Wind to Breeze',
+        'Typing "Breeze" updates the Wind row’s local draft. As long as React keeps that row in the tree, it remembers what you typed.',
         'const [draft, setDraft] = useState(clip.name);\n<input value={draft} onChange={e => setDraft(e.target.value)} />',
         [node('rain', 'Rain', 'kept', 'id: r'), node('wind', 'Breeze', 'active', 'id: w')],
       ),
       step(
         'Reorder the list',
-        'Move Wind ahead of Rain. Both keys and component types still match under the same parent, so the edited text moves with Wind.',
+        'Move Wind ahead of Rain. Under the same parent, each row still has the same key and component type. The Breeze draft now appears in the first row with Wind.',
         'setClips(rows => [...rows].reverse());',
         [
           node('wind', 'Breeze', 'kept', 'id: w · first'),
@@ -270,7 +274,7 @@ export const fundamentals: Lesson[] = [
       ),
       step(
         'Replace a clip',
-        'Remove Rain and add Surf with a new ID. Wind keeps its draft, Rain unmounts, and Surf starts with its own initial state.',
+        'Remove Rain and add Surf with a new ID. React unmounts Rain and gives Surf fresh state. Wind still has its Breeze draft.',
         'setClips(rows => [...rows.filter(c => c.id !== "r"), surf]);',
         [
           node('wind', 'Breeze', 'kept', 'id: w'),
@@ -279,8 +283,8 @@ export const fundamentals: Lesson[] = [
         ],
       ),
       step(
-        'Try position as identity',
-        'Consider the original two rows keyed by index. After a reversal the first slot still has key 0. Its local draft can now be paired with the wrong clip.',
+        'Reverse rows keyed by index',
+        'Go back to Rain and Wind and use the array index as the key. After reversing them, key 0 still identifies the first slot. Wind now shows the Rain draft that belongs to that slot.',
         'clips.map((clip, i) => <ClipRow key={i} clip={clip} />)',
         [
           node('slot0', 'Slot 0', 'active', 'Wind / Rain draft'),
@@ -288,17 +292,19 @@ export const fundamentals: Lesson[] = [
         ],
       ),
     ],
-    pitfall: 'Generating keys during render makes unchanged items look new on each pass.',
+    pitfall:
+      'A different random key on every render makes React discard a row and its draft, even if the clip itself never moved.',
     practice:
-      'Assign IDs when records are created. An index can suffice for a permanently fixed list whose membership and order never change.',
+      'Give each clip an ID when you create it. An array index can work for a list whose items and order stay fixed.',
     recap:
-      'Keys identify siblings within one parent. Matching type and key can preserve state through a move, while a new identity starts fresh.',
+      'Under one parent, the same key and component type let a row keep its state when it moves. Replacing Rain with a new clip gives that row fresh state.',
     source: 'https://react.dev/learn/preserving-and-resetting-state',
     quiz: {
       question: 'Which key keeps a draft attached to its clip after sorting?',
       options: ['The current array index', 'A random value per render', 'The clip’s stored ID'],
       answer: 2,
-      explanation: 'The stored ID travels with the record when its array position changes.',
+      explanation:
+        'Sorting changes the position of Wind, but its stored ID still identifies the row that owns the Breeze draft.',
     },
   },
 ]

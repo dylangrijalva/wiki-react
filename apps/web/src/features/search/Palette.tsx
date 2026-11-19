@@ -61,7 +61,7 @@ export default function Palette({ close }: { close: () => void }) {
             aria-activedescendant={rows[active] ? 'match-' + active : undefined}
             maxLength={160}
             aria-label="Search lessons"
-            placeholder="Search lessons and concepts…"
+            placeholder="Try a topic like props or caching"
             value={term}
             onChange={(e) => {
               setTerm(e.target.value)
@@ -96,8 +96,8 @@ export default function Palette({ close }: { close: () => void }) {
             {result.isPending
               ? 'Searching…'
               : result.isError
-                ? 'Search is unavailable. Try again.'
-                : 'No lessons match this search.'}
+                ? 'We couldn’t load the search results. Try again.'
+                : 'No lessons found. Try a shorter search.'}
           </p>
         )}
         <div className="palette-foot mono">↑ ↓ to browse · Enter to open · Esc to close</div>
